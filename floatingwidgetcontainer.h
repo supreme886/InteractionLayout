@@ -4,7 +4,6 @@
 #include <QObject>
 #include <QWidget>
 
-class WidgetGroup;
 class FloatingWidgetContainerPrivate;
 class FloatingWidgetContainer : public QWidget {
   Q_OBJECT
@@ -12,11 +11,13 @@ class FloatingWidgetContainer : public QWidget {
 
  public:
   using Supre = QWidget;
-  FloatingWidgetContainer(WidgetGroup *wg);
+  FloatingWidgetContainer(QWidget *w);
 
  protected:
+#ifdef Q_OS_WIN
   bool nativeEvent(const QByteArray &eventType, void *message,
                    long *result) override;
+#endif
 };
 
 #endif  // FLOATINGWIDGETCONTAINER_H

@@ -12,8 +12,13 @@ class WidgetTab : public QFrame {
   WidgetTabPrivate* d;
 
  public:
-  using Supre = QFrame;
+  using Super = QFrame;
   WidgetTab(QWidget* tagWidget, QWidget* parent = nullptr);
+
+  void setIcon(const QIcon& icon);
+  QIcon getIcon();
+  void setTitleName(const QString& title);
+  QString titleName();
 
  protected:
   virtual void mousePressEvent(QMouseEvent* e) override;
