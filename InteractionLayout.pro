@@ -23,6 +23,7 @@ HEADERS += \
     dragdecorator.h \
     dragmanager.h \
     floatingwidgetcontainer.h \
+    global.h \
     interactionlayout.h \
     iwidget.h \
     widget.h \
