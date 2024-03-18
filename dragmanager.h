@@ -21,7 +21,7 @@ class DragManager : public QObject {
 
   void moveAndHover(QWidget *w, const QPoint &pos);
 
-  void widgetPlug(QWidget *w, const QPoint &pos);
+  bool widgetPlug(QWidget *w, const QPoint &pos);
 
  public slots:
   void updateDragFeaturesWidgetList();

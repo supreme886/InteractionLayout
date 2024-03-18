@@ -1,10 +1,11 @@
-#ifndef IWIDGET_H
+﻿#ifndef IWIDGET_H
 #define IWIDGET_H
 
 #include <QObject>
 #include <QWidget>
 
 class IWidgetPrivate;
+class WidgetTab;
 
 class IWidget : public QWidget {
   Q_OBJECT
@@ -12,6 +13,8 @@ class IWidget : public QWidget {
  public:
   explicit IWidget(QWidget *parent = nullptr,
                    Qt::WindowFlags flags = Qt::WindowFlags());
+
+  WidgetTab *getWidgetTab();
 
   void setFloating(bool floating);
   inline bool isFloating() { return isWindow(); };

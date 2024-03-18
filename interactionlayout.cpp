@@ -83,8 +83,9 @@ void InteractionLayout::setGeometry(const QRect &r) {
   d->m_rect = r;
 
   QVarLengthArray<QRect, 4> rectList = getRectForArea(d->m_hover);
-  qDebug() << Q_FUNC_INFO << rectList.at(0) << rectList.at(1) << rectList.at(2)
-           << rectList.at(3);
+  // qDebug() << Q_FUNC_INFO << rectList.at(0) << rectList.at(1) <<
+  // rectList.at(2)
+  // << rectList.at(3);
   for (auto iter = d->m_widgets_map.begin(); iter != d->m_widgets_map.end();
        iter++) {
     if (iter.value().size() && iter.key() < rectList.size()) {
@@ -200,8 +201,10 @@ void InteractionLayout::hover(QWidget *widget, const QPoint &mousePos,
 
   d->m_hover = false;
   QVarLengthArray<QRect, 4> rectList = getRectForArea(d->m_hover);
+  qDebug() << Q_FUNC_INFO;
   int targetArea = -1;
   for (int i = 0; i < 4; i++) {
+    qDebug() << Q_FUNC_INFO << rectList.at(i) << mousePos;
     if (rectList.at(i).contains(parentWidget()->mapFromGlobal(mousePos))) {
       targetArea = i;
     }

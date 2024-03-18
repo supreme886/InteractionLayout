@@ -5,6 +5,7 @@
 #include <QObject>
 
 class WidgetTabPrivate;
+class IWidget;
 
 class WidgetTab : public QFrame {
   Q_OBJECT
@@ -13,12 +14,14 @@ class WidgetTab : public QFrame {
 
  public:
   using Super = QFrame;
-  WidgetTab(QWidget* tagWidget, QWidget* parent = nullptr);
+  WidgetTab(IWidget* tagWidget = nullptr, QWidget* parent = nullptr);
 
   void setIcon(const QIcon& icon);
   QIcon getIcon();
   void setTitleName(const QString& title);
   QString titleName();
+
+  IWidget* getIWidget();
 
  protected:
   virtual void mousePressEvent(QMouseEvent* e) override;

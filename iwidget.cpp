@@ -8,10 +8,15 @@
 
 #include "dragmanager.h"
 #include "interactionlayout.h"
+#include "widgettab.h"
 
 class IWidgetPrivate : public QWidgetPrivate {
   Q_DECLARE_PUBLIC(IWidget)
-  IWidgetPrivate(){};
+  IWidgetPrivate() {
+    Q_Q(IWidget);
+    m_tab = new WidgetTab(q);
+    m_tab->setTitleName("this is IWidget");
+  }
   bool mousePressEvent(QMouseEvent *event);
   bool mouseDoubleClickEvent(QMouseEvent *event);
   bool mouseMoveEvent(QMouseEvent *event);
@@ -42,6 +47,7 @@ class IWidgetPrivate : public QWidgetPrivate {
   QWidgetResizeHandler *resizer{nullptr};
   Movestate *state{nullptr};
   int m_margin{5};
+  WidgetTab *m_tab{nullptr};
 };
 
 bool IWidgetPrivate::mousePressEvent(QMouseEvent *event) {
@@ -166,6 +172,9 @@ void IWidgetPrivate::setResizerActive(bool active) {
 void IWidgetPrivate::setWindowState(bool floating, const QRect &rect) {
   Q_Q(IWidget);
 
+  QRect r = q->geometry();
+  r.moveTopLeft(q->mapToGlobal(QPoint(0, 30)));
+
   // qDebug() << Q_FUNC_INFO << q->windowFlags();
   q->setWindowFlags(Qt::Tool /* | Qt::X11BypassWindowManagerHint*/);
   q->setGeometry(rect);
@@ -183,6 +192,11 @@ void IWidgetPrivate::setWindowState(bool floating, const QRect &rect) {
 IWidget::IWidget(QWidget *parent, Qt::WindowFlags flags)
     : QWidget(*new IWidgetPrivate(), parent, flags) {
   setMouseTracking(true);
+}
+
+WidgetTab *IWidget::getWidgetTab() {
+  Q_D(IWidget);
+  return d->m_tab;
 }
 
 void IWidget::setFloating(bool floating) {

@@ -10,8 +10,9 @@
 #include <QTabWidget>
 #include <QTextEdit>
 
-#include "dragdecorator.h"
+#include "basewidget.h"
 #include "dragmanager.h"
+#include "floatingwidgetcontainer.h"
 #include "interactionlayout.h"
 #include "iwidget.h"
 #include "ui_widget.h"
@@ -22,10 +23,10 @@ Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget) {
   InteractionLayout *layout = new InteractionLayout(this);
   layout->setContentsMargins(10, 10, 10, 10);
 
-  // QWidget *tw = new QWidget(this);
-  // tw->resize(200, 300);
-  // tw->setStyleSheet("background: red;");
-  // layout->addWidgetByArea(LayoutInterface::Top_Area, tw);
+  BaseWidget *tw = new BaseWidget(this);
+  tw->resize(200, 300);
+  tw->setStyleSheet("background: red;");
+  layout->addWidgetByArea(LayoutInterface::Top_Area, tw);
 
   IWidget *rw = new IWidget(this);
   rw->resize(200, 300);
@@ -44,6 +45,11 @@ Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget) {
 
   QHBoxLayout *ilayout = new QHBoxLayout(lw);
   ilayout->addWidget(new QLabel(windowTitle()));
+
+  // FloatingWidgetContainer *floating =
+  //     new FloatingWidgetContainer(new QPushButton);
+  // floating->show();
+  // floating->raise();
 
   // QVBoxLayout *a = new QVBoxLayout(lw);
   // a->setMargin(0);

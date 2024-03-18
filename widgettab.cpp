@@ -1,28 +1,51 @@
 ﻿#include "widgettab.h"
 
+#include <QApplication>
 #include <QBoxLayout>
 #include <QIcon>
 #include <QLabel>
 #include <QMouseEvent>
+#include <QStyle>
 #include <QToolButton>
 
 #include "global.h"
+#include "iwidget.h"
 
 struct WidgetTabPrivate {
-  WidgetTabPrivate(QWidget *tagWidget) : m_tagWidget(tagWidget) {}
+  WidgetTabPrivate(WidgetTab *_pub, IWidget *tagWidget);
 
   void saveDragStartMousePosition(const QPoint &GlobalPos);
 
   bool isDraggingState(DragState dragState);
 
-  QWidget *m_tagWidget{nullptr};
+  WidgetTab *_this{nullptr};
+  IWidget *m_tagWidget{nullptr};
   QPoint GlobalDragStartMousePosition;
   QPoint DragStartMousePosition;
   DragState m_DragState;
   QIcon m_Icon;
-  QString m_titleName;
-  QLabel *m_titleLabel;
+  QString m_titleName{"Null"};
+  QLabel *m_titleLabel{nullptr};
+  QToolButton *m_closeBtn{nullptr};
 };
+
+WidgetTabPrivate::WidgetTabPrivate(WidgetTab *_pub, IWidget *tagWidget)
+    : _this(_pub),
+      m_tagWidget(tagWidget),
+      m_Icon(qApp->style()->standardIcon(QStyle::SP_TitleBarCloseButton)),
+      m_titleLabel(new QLabel(_this)),
+      m_closeBtn(new QToolButton(_this)) {
+  m_titleLabel->setText(m_titleName);
+  m_closeBtn->setIcon(m_Icon);
+  m_closeBtn->setToolButtonStyle(Qt::ToolButtonIconOnly);
+
+  QBoxLayout *layout = new QBoxLayout(QBoxLayout::LeftToRight, _this);
+  layout->setContentsMargins(0, 0, 0, 0);
+  layout->setSpacing(5);
+
+  layout->addWidget(m_titleLabel);
+  layout->addWidget(m_closeBtn);
+}
 
 void WidgetTabPrivate::saveDragStartMousePosition(const QPoint &GlobalPos) {
   GlobalDragStartMousePosition = GlobalPos;
@@ -33,16 +56,27 @@ bool WidgetTabPrivate::isDraggingState(DragState dragState) {
   return m_DragState == dragState;
 }
 
-WidgetTab::WidgetTab(QWidget *tagWidget, QWidget *parent)
-    : Super(parent), d(new WidgetTabPrivate(tagWidget)) {}
+WidgetTab::WidgetTab(IWidget *tagWidget, QWidget *parent)
+    : Super(parent), d(new WidgetTabPrivate(this, tagWidget)) {
+  setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+  connect(d->m_closeBtn, &QToolButton::clicked, this, &WidgetTab::closed);
+}
 
-void WidgetTab::setIcon(const QIcon &icon) { d->m_Icon = icon; }
+void WidgetTab::setIcon(const QIcon &icon) {
+  d->m_Icon = icon;
+  d->m_closeBtn->setIcon(d->m_Icon);
+}
 
 QIcon WidgetTab::getIcon() { return d->m_Icon; }
 
-void WidgetTab::setTitleName(const QString &title) { d->m_titleName = title; }
+void WidgetTab::setTitleName(const QString &title) {
+  d->m_titleName = title;
+  d->m_titleLabel->setText(d->m_titleName);
+}
 
 QString WidgetTab::titleName() { return d->m_titleName; }
+
+IWidget *WidgetTab::getIWidget() { return d->m_tagWidget; }
 
 void WidgetTab::mousePressEvent(QMouseEvent *e) {
   if (e->button() == Qt::LeftButton) {

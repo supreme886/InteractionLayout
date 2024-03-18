@@ -11,13 +11,17 @@ class FloatingWidgetContainer : public QWidget {
 
  public:
   using Supre = QWidget;
-  FloatingWidgetContainer(QWidget *w);
+  FloatingWidgetContainer(QWidget *w = nullptr);
 
  protected:
+  bool event(QEvent *event) override;
 #ifdef Q_OS_WIN
   bool nativeEvent(const QByteArray &eventType, void *message,
                    long *result) override;
 #endif
+
+ private:
+  void setWidgetIntoLayout();
 };
 
 #endif  // FLOATINGWIDGETCONTAINER_H

@@ -38,16 +38,18 @@ void DragManager::moveAndHover(QWidget *w, const QPoint &pos) {
   }
 }
 
-void DragManager::widgetPlug(QWidget *w, const QPoint &pos) {
+bool DragManager::widgetPlug(QWidget *w, const QPoint &pos) {
   foreach (QWidget *item, d->hasDragFeatureWidgets) {
     if (item->geometry().contains(pos)) {
       InteractionLayout *layout =
           qobject_cast<InteractionLayout *>(item->layout());
       if (layout) {
         layout->plug(w, pos);
+        return true;
       }
     }
   }
+  return false;
 }
 
 void DragManager::updateDragFeaturesWidgetList() {

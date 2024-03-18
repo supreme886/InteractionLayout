@@ -9,7 +9,7 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    dragdecorator.cpp \
+    basewidget.cpp \
     dragmanager.cpp \
     floatingwidgetcontainer.cpp \
     interactionlayout.cpp \
@@ -17,10 +17,11 @@ SOURCES += \
     main.cpp \
     widget.cpp \
     widgetgroup.cpp \
-    widgettab.cpp
+    widgettab.cpp \
+    widgettabbar.cpp
 
 HEADERS += \
-    dragdecorator.h \
+    basewidget.h \
     dragmanager.h \
     floatingwidgetcontainer.h \
     global.h \
@@ -28,7 +29,8 @@ HEADERS += \
     iwidget.h \
     widget.h \
     widgetgroup.h \
-    widgettab.h
+    widgettab.h \
+    widgettabbar.h
 
 FORMS += \
     widget.ui
