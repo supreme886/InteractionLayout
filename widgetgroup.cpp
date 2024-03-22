@@ -2,7 +2,7 @@
 
 #include <QHBoxLayout>
 #include <QScrollArea>
-#include <QStackedWidget>
+#include <QStackedLayout>
 #include <QTabWidget>
 
 #include "iwidget.h"
@@ -13,17 +13,17 @@ struct WidgetGroupPrivate {
   WidgetGroupPrivate(WidgetGroup *_t)
       : _this(_t),
         m_tabBar(new WidgetTabBar(_this)),
-        m_StackedWidget(new QStackedWidget(_this)) {
+        m_Stacked(new QStackedLayout) {
     QBoxLayout *l = new QBoxLayout(QBoxLayout::TopToBottom, _this);
     l->setMargin(0);
     l->setSpacing(0);
     l->addWidget(m_tabBar);
-    l->addWidget(m_StackedWidget);
+    l->addLayout(m_Stacked);
   }
 
   WidgetGroup *_this{nullptr};
   WidgetTabBar *m_tabBar{nullptr};
-  QStackedWidget *m_StackedWidget{nullptr};
+  QStackedLayout *m_Stacked{nullptr};
   QScrollArea *m_ScrollArea{nullptr};
 };
 
@@ -40,25 +40,26 @@ int WidgetGroup::insertWidget(int index, QWidget *w) {
     WidgetTab *tab = new WidgetTab;
     d->m_tabBar->addWidgetTab(tab);
   }
-  d->m_StackedWidget->insertWidget(index, w);
-  d->m_StackedWidget->setCurrentWidget(w);
+  d->m_Stacked->insertWidget(index, w);
+  d->m_Stacked->setCurrentWidget(w);
   return true;
 }
 
 void WidgetGroup::setCurrentIndex(int index) {
-  d->m_StackedWidget->setCurrentIndex(index);
+  d->m_Stacked->setCurrentIndex(index);
 }
 
 void WidgetGroup::setCurrentWidget(QWidget *widget) {
-  d->m_StackedWidget->setCurrentWidget(widget);
+  d->m_Stacked->setCurrentWidget(widget);
 }
 
 void WidgetGroup::removeWidgetByIndex(int index) {
-  d->m_StackedWidget->removeWidget(d->m_StackedWidget->widget(index));
+  if (index >= 0 && index < d->m_Stacked->count())
+    d->m_Stacked->takeAt(index)->widget()->deleteLater();
 }
 
 void WidgetGroup::removeWidget(QWidget *widget) {
-  d->m_StackedWidget->removeWidget(widget);
+  d->m_Stacked->removeWidget(widget);
 }
 
 void WidgetGroup::startSplits() { BaseWidget::startSplits(); }

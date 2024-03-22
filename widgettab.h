@@ -15,6 +15,7 @@ class WidgetTab : public QFrame {
  public:
   using Super = QFrame;
   WidgetTab(IWidget* tagWidget = nullptr, QWidget* parent = nullptr);
+  ~WidgetTab();
 
   void setIcon(const QIcon& icon);
   QIcon getIcon();
@@ -33,6 +34,7 @@ class WidgetTab : public QFrame {
   void activeTabChanged();
   void clicked();
   void closed();
+  void tabsplit();
   void closeOtherTabs();
   void moved(const QPoint& GlobalPos);
 };

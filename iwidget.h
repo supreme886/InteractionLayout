@@ -16,7 +16,7 @@ class IWidget : public QWidget {
 
   WidgetTab *getWidgetTab();
 
-  void setFloating(bool floating);
+  void setFloating(bool floating, const QRect &rect);
   inline bool isFloating() { return isWindow(); };
 
  protected:

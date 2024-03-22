@@ -18,7 +18,7 @@ struct WidgetTabBarPrivate {
   QFrame *m_tabListFrame{nullptr};
   QBoxLayout *m_tabListFrameLayout{nullptr};
   QPoint m_startDragPonit;
-  DragState m_dragState;
+  DragState m_dragState{DraggingInactive};
 };
 
 WidgetTabBarPrivate::WidgetTabBarPrivate(WidgetTabBar *pubThis, WidgetGroup *wg)
@@ -49,6 +49,7 @@ bool WidgetTabBar::insertWidgetTab(int index, WidgetTab *tab) {
   if (tab && (index >= 0 || index < d->m_tabListFrameLayout->count())) {
     connect(tab, &WidgetTab::clicked, this, &WidgetTabBar::onTabClicked);
     connect(tab, &WidgetTab::closed, this, &WidgetTabBar::onTabClosed);
+    connect(tab, &WidgetTab::tabsplit, this, &WidgetTabBar::onTabSplit);
     connect(tab, &WidgetTab::closeOtherTabs, this,
             &WidgetTabBar::onTabCloseOtherTabs);
     connect(tab, &WidgetTab::activeTabChanged, this,
@@ -87,8 +88,6 @@ void WidgetTabBar::mouseMoveEvent(QMouseEvent *event) {
   }
 
   int DragDistance = (d->m_startDragPonit - event->pos()).manhattanLength();
-  qDebug() << Q_FUNC_INFO << event->pos() << DragDistance
-           << qApp->startDragDistance();
   if (DragDistance >= qApp->startDragDistance()) {
     splitWidgt();
     d->m_dragState = DraggingInactive;
@@ -124,8 +123,6 @@ void WidgetTabBar::onTabClicked() {
     return;
   }
   setCurrentIndex(index);
-
-  // setCurrentWidget(tab->getIWidget());
 }
 
 void WidgetTabBar::onTabClosed() {
@@ -138,9 +135,25 @@ void WidgetTabBar::onTabClosed() {
     return;
   }
 
-  d->m_tabListFrameLayout->removeWidget(tab);
+  d->m_tabListFrameLayout->takeAt(index);
+  tab->setParent(nullptr);
   d->m_tabListFrameLayout->update();
   d->m_widgetGroup->removeWidgetByIndex(index);
+}
+
+void WidgetTabBar::onTabSplit() {
+  WidgetTab *tab = qobject_cast<WidgetTab *>(sender());
+  if (!tab) {
+    return;
+  }
+  int index = d->m_tabListFrameLayout->indexOf(tab);
+  if (index < 0) {
+    return;
+  }
+
+  d->m_tabListFrameLayout->takeAt(index);
+  tab->setParent(nullptr);
+  d->m_tabListFrameLayout->update();
 }
 
 void WidgetTabBar::onTabCloseOtherTabs() {}

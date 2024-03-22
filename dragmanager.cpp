@@ -13,6 +13,7 @@ struct DragManagerPrivate {
   DragManager *_this{nullptr};
   QList<QWidget *> hasDragFeatureWidgets;
   QList<FloatingWidgetContainer *> floatingwidgets;
+  int m_DragDistance{6};
 };
 
 DragManager::DragManager(Supre *parent)
@@ -27,12 +28,15 @@ void DragManager::addFloatingWidgetContainerWidget(FloatingWidgetContainer *w) {
 }
 
 void DragManager::moveAndHover(QWidget *w, const QPoint &pos) {
+  QList<QWidget *> widget_list;
   foreach (QWidget *item, d->hasDragFeatureWidgets) {
-    if (item->geometry().contains(pos)) {
-      InteractionLayout *layout =
-          qobject_cast<InteractionLayout *>(item->layout());
-      if (layout) {
+    InteractionLayout *layout =
+        qobject_cast<InteractionLayout *>(item->layout());
+    if (layout) {
+      if (item->geometry().contains(pos)) {
         layout->hover(w, pos);
+      } else {
+        layout->setGapIndicatorHide();
       }
     }
   }

@@ -85,6 +85,8 @@ class InteractionLayout : public QLayout, public LayoutInterface {
 
   bool setCornerBelongs(Corner corner, Area area);
 
+  void setGapIndicatorHide();
+
  private:
   int smartSpacing(QStyle::PixelMetric pm) const;
 

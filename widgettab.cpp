@@ -2,6 +2,7 @@
 
 #include <QApplication>
 #include <QBoxLayout>
+#include <QDebug>
 #include <QIcon>
 #include <QLabel>
 #include <QMouseEvent>
@@ -49,7 +50,7 @@ WidgetTabPrivate::WidgetTabPrivate(WidgetTab *_pub, IWidget *tagWidget)
 
 void WidgetTabPrivate::saveDragStartMousePosition(const QPoint &GlobalPos) {
   GlobalDragStartMousePosition = GlobalPos;
-  DragStartMousePosition = m_tagWidget->mapFromGlobal(GlobalPos);
+  DragStartMousePosition = _this->mapFromGlobal(GlobalPos);
 }
 
 bool WidgetTabPrivate::isDraggingState(DragState dragState) {
@@ -58,9 +59,12 @@ bool WidgetTabPrivate::isDraggingState(DragState dragState) {
 
 WidgetTab::WidgetTab(IWidget *tagWidget, QWidget *parent)
     : Super(parent), d(new WidgetTabPrivate(this, tagWidget)) {
+  setAutoFillBackground(true);
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   connect(d->m_closeBtn, &QToolButton::clicked, this, &WidgetTab::closed);
 }
+
+WidgetTab::~WidgetTab() { qDebug() << Q_FUNC_INFO; }
 
 void WidgetTab::setIcon(const QIcon &icon) {
   d->m_Icon = icon;
@@ -123,6 +127,21 @@ void WidgetTab::mouseMoveEvent(QMouseEvent *e) {
     d->m_DragState = DraggingInactive;
     Super::mouseMoveEvent(e);
     return;
+  }
+
+  QPoint point = e->pos() - d->DragStartMousePosition;
+  if (d->isDraggingState(DraggingMousePressed) &&
+      point.manhattanLength() > 10) {
+    if (d->m_tagWidget) {
+      QRect r = d->m_tagWidget->geometry();
+      r.moveTopLeft(d->m_tagWidget->mapToGlobal(QPoint(0, 30)));
+      qDebug() << Q_FUNC_INFO << r;
+      d->m_tagWidget->setFloating(true, r);
+      d->m_tagWidget->move(d->m_tagWidget->mapToGlobal(QPoint(0, 30)));
+
+      d->m_DragState = DraggingTab;
+      Q_EMIT tabsplit();
+    }
   }
 
   Super::mouseMoveEvent(e);

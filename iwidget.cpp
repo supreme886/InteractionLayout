@@ -12,11 +12,8 @@
 
 class IWidgetPrivate : public QWidgetPrivate {
   Q_DECLARE_PUBLIC(IWidget)
-  IWidgetPrivate() {
-    Q_Q(IWidget);
-    m_tab = new WidgetTab(q);
-    m_tab->setTitleName("this is IWidget");
-  }
+  IWidgetPrivate() {}
+  ~IWidgetPrivate() { qDebug() << Q_FUNC_INFO; }
   bool mousePressEvent(QMouseEvent *event);
   bool mouseDoubleClickEvent(QMouseEvent *event);
   bool mouseMoveEvent(QMouseEvent *event);
@@ -172,9 +169,6 @@ void IWidgetPrivate::setResizerActive(bool active) {
 void IWidgetPrivate::setWindowState(bool floating, const QRect &rect) {
   Q_Q(IWidget);
 
-  QRect r = q->geometry();
-  r.moveTopLeft(q->mapToGlobal(QPoint(0, 30)));
-
   // qDebug() << Q_FUNC_INFO << q->windowFlags();
   q->setWindowFlags(Qt::Tool /* | Qt::X11BypassWindowManagerHint*/);
   q->setGeometry(rect);
@@ -191,6 +185,9 @@ void IWidgetPrivate::setWindowState(bool floating, const QRect &rect) {
 
 IWidget::IWidget(QWidget *parent, Qt::WindowFlags flags)
     : QWidget(*new IWidgetPrivate(), parent, flags) {
+  Q_D(IWidget);
+  d->m_tab = new WidgetTab(this);
+  d->m_tab->setTitleName("this is IWidget");
   setMouseTracking(true);
 }
 
@@ -199,9 +196,9 @@ WidgetTab *IWidget::getWidgetTab() {
   return d->m_tab;
 }
 
-void IWidget::setFloating(bool floating) {
+void IWidget::setFloating(bool floating, const QRect &rect) {
   Q_D(IWidget);
-  d->setWindowState(floating, geometry());
+  d->setWindowState(floating, rect);
 }
 
 bool IWidget::event(QEvent *event) {
@@ -252,6 +249,8 @@ bool IWidget::event(QEvent *event) {
     case QEvent::NonClientAreaMouseButtonDblClick:
       d->nonClientAreaMouseEvent(static_cast<QMouseEvent *>(event));
       return true;
+    case QEvent::Enter:
+      qDebug() << Q_FUNC_INFO;
     case QEvent::Move:
       // d->moveEvent(static_cast<QMoveEvent *>(event));
       // DragManager::instance()->moveAndHover(this,

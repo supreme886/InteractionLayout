@@ -201,10 +201,9 @@ void InteractionLayout::hover(QWidget *widget, const QPoint &mousePos,
 
   d->m_hover = false;
   QVarLengthArray<QRect, 4> rectList = getRectForArea(d->m_hover);
-  qDebug() << Q_FUNC_INFO;
   int targetArea = -1;
   for (int i = 0; i < 4; i++) {
-    qDebug() << Q_FUNC_INFO << rectList.at(i) << mousePos;
+    // qDebug() << Q_FUNC_INFO << rectList.at(i) << mousePos;
     if (rectList.at(i).contains(parentWidget()->mapFromGlobal(mousePos))) {
       targetArea = i;
     }
@@ -255,6 +254,11 @@ bool InteractionLayout::setCornerBelongs(Corner corner, Area area) {
   Q_D(InteractionLayout);
   d->m_corner_belong.insert(corner, area);  // FIXME  corner 与 area 不相交
   return true;
+}
+
+void InteractionLayout::setGapIndicatorHide() {
+  Q_D(InteractionLayout);
+  if (d->gapIndicator) delete d->gapIndicator;
 }
 
 // QLayoutItem *InteractionLayout::unplug(QWidget *widget, bool group) {

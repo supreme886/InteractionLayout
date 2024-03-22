@@ -33,6 +33,7 @@ class WidgetTabBar : public QFrame {
   void onTabActiveTabChanged();
   void onTabClicked();
   void onTabClosed();
+  void onTabSplit();
   void onTabCloseOtherTabs();
   void onTabMoved(const QPoint &GlobalPos);
 
