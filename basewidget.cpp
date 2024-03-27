@@ -17,7 +17,7 @@ struct BaseWidgetPrivate {
 BaseWidget::BaseWidget(QWidget *parent)
     : Super(parent), d(new BaseWidgetPrivate(this)) {}
 
-void BaseWidget::startSplits() {
+FloatingWidgetContainer *BaseWidget::startSplits() {
   QRect r = geometry();
   r.moveTopLeft(mapToGlobal(QPoint(0, 30)));
 
@@ -33,6 +33,8 @@ void BaseWidget::startSplits() {
   container->setGeometry(r);
   container->show();
   // container->grabMouse();
+
+  return container;
 }
 
 void BaseWidget::endSplits() {}

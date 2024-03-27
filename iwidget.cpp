@@ -49,6 +49,7 @@ class IWidgetPrivate : public QWidgetPrivate {
 
 bool IWidgetPrivate::mousePressEvent(QMouseEvent *event) {
   if (event->button() == Qt::LeftButton) {
+    qDebug() << Q_FUNC_INFO << (state == nullptr) << event->pos();
     if (state) return false;
     initState(event->pos());
     return true;
@@ -170,7 +171,8 @@ void IWidgetPrivate::setWindowState(bool floating, const QRect &rect) {
   Q_Q(IWidget);
 
   // qDebug() << Q_FUNC_INFO << q->windowFlags();
-  q->setWindowFlags(Qt::Tool /* | Qt::X11BypassWindowManagerHint*/);
+  q->setWindowFlags(Qt::Tool | Qt::WindowMaximizeButtonHint |
+                    Qt::WindowCloseButtonHint);
   q->setGeometry(rect);
   q->show();
 

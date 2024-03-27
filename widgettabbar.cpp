@@ -33,6 +33,12 @@ WidgetTabBarPrivate::WidgetTabBarPrivate(WidgetTabBar *pubThis, WidgetGroup *wg)
   m_tabListFrameLayout->setContentsMargins(0, 0, 0, 0);
   m_tabListFrameLayout->setSpacing(5);
   m_tabListFrameLayout->addWidget(area);
+
+  // for (int i = 0; i < 10; i++) {
+  //   QToolButton *btn = new QToolButton(_this);
+  //   btn->setText("Btn " + QString::number(i));
+  //   m_tabListFrameLayout->addWidget(btn);
+  // }
 }
 
 WidgetTabBar::WidgetTabBar(WidgetGroup *parent)
@@ -153,7 +159,6 @@ void WidgetTabBar::onTabSplit() {
 
   d->m_tabListFrameLayout->takeAt(index);
   tab->setParent(nullptr);
-  d->m_tabListFrameLayout->update();
 }
 
 void WidgetTabBar::onTabCloseOtherTabs() {}

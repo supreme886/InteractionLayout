@@ -5,7 +5,7 @@
 #include <QObject>
 
 class BaseWidgetPrivate;
-
+class FloatingWidgetContainer;
 class BaseWidget : public QFrame {
   Q_OBJECT
   BaseWidgetPrivate *d;
@@ -14,7 +14,7 @@ class BaseWidget : public QFrame {
   using Super = QFrame;
   BaseWidget(QWidget *parent = nullptr);
 
-  void startSplits();
+  FloatingWidgetContainer *startSplits();
   void endSplits();
 
  protected:

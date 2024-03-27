@@ -133,11 +133,17 @@ void WidgetTab::mouseMoveEvent(QMouseEvent *e) {
   if (d->isDraggingState(DraggingMousePressed) &&
       point.manhattanLength() > 10) {
     if (d->m_tagWidget) {
-      QRect r = d->m_tagWidget->geometry();
-      r.moveTopLeft(d->m_tagWidget->mapToGlobal(QPoint(0, 30)));
-      qDebug() << Q_FUNC_INFO << r;
+      QRect r = d->m_tagWidget->parentWidget()->geometry();
+      r.moveTopLeft(d->m_tagWidget->mapToGlobal(QPoint(0, 0)));
+      d->m_tagWidget->setParent(nullptr);
       d->m_tagWidget->setFloating(true, r);
-      d->m_tagWidget->move(d->m_tagWidget->mapToGlobal(QPoint(0, 30)));
+
+      QMouseEvent *mouseEvent =
+          new QMouseEvent(QEvent::MouseButtonPress, e->pos(), Qt::LeftButton,
+                          Qt::LeftButton, Qt::NoModifier);
+      qApp->sendEvent(d->m_tagWidget, mouseEvent);
+
+      d->m_tagWidget->grabMouse();
 
       d->m_DragState = DraggingTab;
       Q_EMIT tabsplit();
