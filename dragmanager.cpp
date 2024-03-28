@@ -2,18 +2,23 @@
 
 #include <QDebug>
 #include <QPointer>
+#include <QSharedPointer>
 #include <QWidget>
 
+#include "drageventfilter.h"
 #include "floatingwidgetcontainer.h"
 #include "interactionlayout.h"
 
 struct DragManagerPrivate {
-  DragManagerPrivate(DragManager *t) : _this(t) {}
+  DragManagerPrivate(DragManager *t) : _this(t) {
+    m_dragfilter = QSharedPointer<DragEventFilter>(new DragEventFilter);
+  }
 
   DragManager *_this{nullptr};
   QList<QWidget *> hasDragFeatureWidgets;
   QList<FloatingWidgetContainer *> floatingwidgets;
   int m_DragDistance{6};
+  QSharedPointer<DragEventFilter> m_dragfilter;
 };
 
 DragManager::DragManager(Supre *parent)
@@ -54,6 +59,10 @@ bool DragManager::widgetPlug(QWidget *w, const QPoint &pos) {
     }
   }
   return false;
+}
+
+void DragManager::setDragEventFilter(QWidget *w) {
+  d->m_dragfilter->setDragWidget(w);
 }
 
 void DragManager::updateDragFeaturesWidgetList() {

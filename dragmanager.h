@@ -5,6 +5,7 @@
 
 class DragManagerPrivate;
 class FloatingWidgetContainer;
+class DragEventFilter;
 class DragManager : public QObject {
   Q_OBJECT
 
@@ -22,6 +23,8 @@ class DragManager : public QObject {
   void moveAndHover(QWidget *w, const QPoint &pos);
 
   bool widgetPlug(QWidget *w, const QPoint &pos);
+
+  void setDragEventFilter(QWidget *w);
 
  public slots:
   void updateDragFeaturesWidgetList();

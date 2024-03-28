@@ -54,32 +54,6 @@ bool FloatingWidgetContainer::event(QEvent *event) {
       if (e && Qt::LeftButton == e->button())*/
       setWidgetIntoLayout();
       break;
-    case QEvent::MouseButtonPress: {
-      QMouseEvent *e = qobject_cast<QMouseEvent *>(event);
-      if (Qt::LeftButton == e->button()) {
-        d->m_isPressed = true;
-        d->m_pressPoint = e->pos();
-      }
-    } break;
-    case QEvent::MouseButtonRelease: {
-      QMouseEvent *e = qobject_cast<QMouseEvent *>(event);
-      if (Qt::LeftButton == e->button()) {
-        d->m_isPressed = false;
-        d->m_pressPoint = QPoint();
-        releaseMouse();
-      }
-    } break;
-    case QEvent::MouseMove: {
-      if (d->m_isPressed) {
-        QMouseEvent *e = qobject_cast<QMouseEvent *>(event);
-        QMargins windowMargins = window()->windowHandle()->frameMargins();
-        QPoint windowMarginOffset =
-            QPoint(windowMargins.left(), windowMargins.top());
-        QPoint pos = e->globalPos() - d->m_pressPoint - windowMarginOffset;
-        move(pos);
-        DragManager::instance()->moveAndHover(this, QCursor::pos());
-      }
-    } break;
     default:
       break;
   }
@@ -91,7 +65,7 @@ bool FloatingWidgetContainer::nativeEvent(const QByteArray &eventType,
                                           void *message, long *result) {
   QWidget::nativeEvent(eventType, message, result);
   MSG *msg = static_cast<MSG *>(message);
-  qDebug() << Q_FUNC_INFO << msg->message;
+  // qDebug() << Q_FUNC_INFO << msg->message;
   switch (msg->message) {
     case WM_MOVING: {
       DragManager::instance()->moveAndHover(this, QCursor::pos());

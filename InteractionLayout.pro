@@ -10,6 +10,7 @@ CONFIG += c++17
 
 SOURCES += \
     basewidget.cpp \
+    drageventfilter.cpp \
     dragmanager.cpp \
     floatingwidgetcontainer.cpp \
     interactionlayout.cpp \
@@ -22,6 +23,7 @@ SOURCES += \
 
 HEADERS += \
     basewidget.h \
+    drageventfilter.h \
     dragmanager.h \
     floatingwidgetcontainer.h \
     global.h \

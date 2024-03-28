@@ -1,7 +1,12 @@
 ﻿#include "basewidget.h"
 
+#include <QApplication>
+#include <QDebug>
 #include <QEvent>
+#include <QMouseEvent>
 
+#include "drageventfilter.h"
+#include "dragmanager.h"
 #include "floatingwidgetcontainer.h"
 #include "interactionlayout.h"
 #include "widgettab.h"
@@ -30,9 +35,15 @@ FloatingWidgetContainer *BaseWidget::startSplits() {
   }
 
   FloatingWidgetContainer *container = new FloatingWidgetContainer(this);
-  container->setGeometry(r);
+  qDebug() << Q_FUNC_INFO << r << container->parent();
   container->show();
-  // container->grabMouse();
+  container->setGeometry(r);
+
+  DragManager::instance()->setDragEventFilter(container);
+  QMouseEvent *mouseEvent =
+      new QMouseEvent(QEvent::MouseButtonPress, QCursor::pos(), Qt::LeftButton,
+                      Qt::LeftButton, Qt::NoModifier);
+  qApp->sendEvent(container, mouseEvent);
 
   return container;
 }
