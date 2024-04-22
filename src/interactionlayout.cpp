@@ -66,17 +66,18 @@ QSize InteractionLayout::maximumSize() const { return QSize(); }
 QSize InteractionLayout::sizeHint() const { return QSize(); }
 
 void InteractionLayout::setGeometry(const QRect &r) {
-  qDebug() << Q_FUNC_INFO;
   d->m_rect = r;
 
-  if (d->m_center_wIdget) d->m_center_wIdget->setGeometry(r);
+  if (d->m_center_wIdget) {
+    d->m_center_wIdget->widget()->lower();
+    d->m_center_wIdget->setGeometry(r);
+  }
 
   QVarLengthArray<QRect, 4> rectList = getRectForArea(d->m_hover);
   for (auto iter = d->m_widgets_map.begin(); iter != d->m_widgets_map.end();
        iter++) {
     if (iter.value().size() && iter.key() < rectList.size()) {
       iter.value().at(0)->setGeometry(rectList.at(iter.key()));
-      iter.value().at(0)->widget()->raise();
     }
   }
 }

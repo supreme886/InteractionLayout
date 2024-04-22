@@ -21,7 +21,7 @@ struct BaseWidgetPrivate {
 
   BaseSubWidget *_this{nullptr};
   TabInfoStruct *m_widgetTab{nullptr};
-  QWidgetResizeHandler *m_reszie_handler{nullptr};
+  WidgetResizeHandler *m_reszie_handler{nullptr};
   QPoint m_press_point;
   QPoint m_press_global_point;
   bool m_has_press{false};
@@ -35,7 +35,8 @@ void BaseWidgetPrivate::saveDragStartMousePosition(const QPoint &GlobalPos) {
 
 BaseSubWidget::BaseSubWidget(QWidget *parent)
     : Super(parent), d(new BaseWidgetPrivate(this)) {
-  d->m_widgetTab->m_titleName = "dadadas";
+  d->m_widgetTab->m_titleName = "dadadasdddddddddddddd";
+  setMouseTracking(true);
 }
 
 BaseSubWidget::~BaseSubWidget() {
@@ -67,17 +68,13 @@ void BaseSubWidget::endSplits() {}
 
 void BaseSubWidget::setResizeHandle(bool canResize) {
   if (!d->m_reszie_handler) {
-    d->m_reszie_handler = new QWidgetResizeHandler(this);
+    d->m_reszie_handler = new WidgetResizeHandler(this);
   }
-  d->m_reszie_handler->setMovingEnabled(canResize);
-  d->m_reszie_handler->setActive(QWidgetResizeHandler::Resize, canResize);
+  // d->m_reszie_handler->setMovingEnabled(canResize);
+  d->m_reszie_handler->setActive(WidgetResizeHandler::Resize, canResize);
 }
 
 TabInfoStruct *BaseSubWidget::getTabInfoStruct() { return d->m_widgetTab; }
-
-bool BaseSubWidget::eventFilter(QObject *watched, QEvent *event) {
-  return Super::eventFilter(watched, event);
-}
 
 bool BaseSubWidget::event(QEvent *event) {
   switch (event->type()) {

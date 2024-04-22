@@ -23,7 +23,6 @@ class BaseSubWidget : public QFrame {
   TabInfoStruct *getTabInfoStruct();
 
  protected:
-  bool eventFilter(QObject *watched, QEvent *event) override;
   bool event(QEvent *event) override;
   void mousePressEvent(QMouseEvent *e) override;
   void mouseReleaseEvent(QMouseEvent *e) override;

@@ -6,13 +6,13 @@
 class QMouseEvent;
 class QKeyEvent;
 
-class QWidgetResizeHandler : public QObject {
+class WidgetResizeHandler : public QObject {
   Q_OBJECT
 
  public:
   enum Action { Move = 0x01, Resize = 0x02, Any = Move | Resize };
 
-  explicit QWidgetResizeHandler(QWidget *parent, QWidget *cw = nullptr);
+  explicit WidgetResizeHandler(QWidget *parent, QWidget *cw = nullptr);
   void setActive(bool b) { setActive(Any, b); }
   void setActive(Action ac, bool b);
   bool isActive() const { return isActive(Any); }
@@ -39,7 +39,7 @@ class QWidgetResizeHandler : public QObject {
   // void keyPressEvent(QKeyEvent *e);
 
  private:
-  Q_DISABLE_COPY_MOVE(QWidgetResizeHandler)
+  Q_DISABLE_COPY_MOVE(WidgetResizeHandler)
 
   enum MousePosition {
     Nowhere,

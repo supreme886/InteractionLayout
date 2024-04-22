@@ -45,6 +45,7 @@ IWidgetTab::IWidgetTab(TabInfoStruct *tab, QWidget *parent)
   setAutoFillBackground(true);
   setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
   setCheckable(true);
+  setMouseTracking(true);
 }
 
 IWidgetTab::~IWidgetTab() {
@@ -118,7 +119,10 @@ WidgetTab::WidgetTab(TabInfoStruct *tab, QWidget *parent) : Super(tab, parent) {
   QHBoxLayout *layout = new QHBoxLayout(this);
   layout->setContentsMargins(15, 0, 15, 0);
   layout->setSpacing(5);
-  layout->addWidget(new QLabel(titleName()));
+
+  QLabel *title = new QLabel(titleName());
+  title->setMouseTracking(true);
+  layout->addWidget(title);
 
   QPushButton *close_btn = new QPushButton;
   close_btn->setFixedSize(20, 20);

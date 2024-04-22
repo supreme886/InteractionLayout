@@ -43,12 +43,12 @@ QSize qSmartMinSize(const QWidget *w) {
   return s.expandedTo(QSize(0, 0));
 }
 
-// ### fixme: Qt 6: No longer export QWidgetResizeHandler and remove "Move"
+// ### fixme: Qt 6: No longer export WidgetResizeHandler and remove "Move"
 // functionality. Currently, only the resize functionality is used by
 // QDockWidget. Historically, the class was used in Qt 3's QWorkspace
 // (predecessor to QMdiArea).
 
-QWidgetResizeHandler::QWidgetResizeHandler(QWidget *parent, QWidget *cw)
+WidgetResizeHandler::WidgetResizeHandler(QWidget *parent, QWidget *cw)
     : QObject(parent),
       widget(parent),
       childWidget(cw ? cw : parent),
@@ -59,7 +59,6 @@ QWidgetResizeHandler::QWidgetResizeHandler(QWidget *parent, QWidget *cw)
       sizeprotect(true),
       movingEnabled(true) {
   mode = Nowhere;
-  widget->setMouseTracking(true);
   QFrame *frame = qobject_cast<QFrame *>(widget);
   range = frame ? frame->frameWidth() : RANGE;
   range = qMax(RANGE, range);
@@ -67,14 +66,14 @@ QWidgetResizeHandler::QWidgetResizeHandler(QWidget *parent, QWidget *cw)
   widget->installEventFilter(this);
 }
 
-void QWidgetResizeHandler::setActive(Action ac, bool b) {
+void WidgetResizeHandler::setActive(Action ac, bool b) {
   if (ac & Move) activeForMove = b;
   if (ac & Resize) activeForResize = b;
 
   if (!isActive()) setMouseCursor(Nowhere);
 }
 
-bool QWidgetResizeHandler::isActive(Action ac) const {
+bool WidgetResizeHandler::isActive(Action ac) const {
   bool b = false;
   if (ac & Move) b = activeForMove;
   if (ac & Resize) b |= activeForResize;
@@ -82,8 +81,7 @@ bool QWidgetResizeHandler::isActive(Action ac) const {
   return b;
 }
 
-bool QWidgetResizeHandler::eventFilter(QObject *o, QEvent *ee) {
-  qDebug() << Q_FUNC_INFO << isActive() << ee->type() << __LINE__;
+bool WidgetResizeHandler::eventFilter(QObject *o, QEvent *ee) {
   if (!isActive() ||
       (ee->type() != QEvent::MouseButtonPress &&
        ee->type() != QEvent::MouseButtonRelease &&
@@ -98,7 +96,6 @@ bool QWidgetResizeHandler::eventFilter(QObject *o, QEvent *ee) {
       buttonDown = false;
     return false;
   }
-  qDebug() << Q_FUNC_INFO << __LINE__;
   switch (ee->type()) {
     case QEvent::MouseButtonPress: {
       QMouseEvent *e = static_cast<QMouseEvent *>(ee);
@@ -172,9 +169,8 @@ bool QWidgetResizeHandler::eventFilter(QObject *o, QEvent *ee) {
   return false;
 }
 
-void QWidgetResizeHandler::mouseMoveEvent(QMouseEvent *e) {
+void WidgetResizeHandler::mouseMoveEvent(QMouseEvent *e) {
   QPoint pos = widget->mapFromGlobal(e->globalPos());
-  qDebug() << Q_FUNC_INFO << moveResizeMode << buttonDown;
   if (!moveResizeMode && !buttonDown) {
     if (pos.y() <= range && pos.x() <= range)
       mode = TopLeft;
@@ -199,7 +195,6 @@ void QWidgetResizeHandler::mouseMoveEvent(QMouseEvent *e) {
       mode = Nowhere;
 
     if (widget->isMinimized() || !isActive(Resize)) mode = Center;
-    qDebug() << Q_FUNC_INFO << mode;
     setMouseCursor(mode);
     return;
   }
@@ -306,18 +301,18 @@ void QWidgetResizeHandler::mouseMoveEvent(QMouseEvent *e) {
   }
 }
 
-void QWidgetResizeHandler::setMouseCursor(MousePosition m) {
+void WidgetResizeHandler::setMouseCursor(MousePosition m) {
 #ifdef QT_NO_CURSOR
   Q_UNUSED(m);
 #else
-  QObjectList children = widget->children();
-  for (int i = 0; i < children.size(); ++i) {
-    if (QWidget *w = qobject_cast<QWidget *>(children.at(i))) {
-      if (!w->testAttribute(Qt::WA_SetCursor)) {
-        w->setCursor(Qt::ArrowCursor);
-      }
-    }
-  }
+  // QObjectList children = widget->children();
+  // for (int i = 0; i < children.size(); ++i) {
+  //   if (QWidget *w = qobject_cast<QWidget *>(children.at(i))) {
+  //     if (!w->testAttribute(Qt::WA_SetCursor)) {
+  //       w->setCursor(Qt::ArrowCursor);
+  //     }
+  //   }
+  // }
 
   switch (m) {
     case TopLeft:
@@ -343,7 +338,7 @@ void QWidgetResizeHandler::setMouseCursor(MousePosition m) {
 #endif  // QT_NO_CURSOR
 }
 
-// void QWidgetResizeHandler::keyPressEvent(QKeyEvent *e) {
+// void WidgetResizeHandler::keyPressEvent(QKeyEvent *e) {
 //   if (!isMove() && !isResize()) return;
 //   bool is_control = e->modifiers() & Qt::ControlModifier;
 //   int delta = is_control ? 1 : 8;
@@ -464,7 +459,7 @@ void QWidgetResizeHandler::setMouseCursor(MousePosition m) {
 //   QCursor::setPos(pos);
 // }
 
-void QWidgetResizeHandler::doResize() {
+void WidgetResizeHandler::doResize() {
   if (!activeForResize) return;
 
   moveResizeMode = true;
@@ -492,7 +487,7 @@ void QWidgetResizeHandler::doResize() {
   resizeVerticalDirectionFixed = false;
 }
 
-void QWidgetResizeHandler::doMove() {
+void WidgetResizeHandler::doMove() {
   if (!activeForMove) return;
 
   mode = Center;
