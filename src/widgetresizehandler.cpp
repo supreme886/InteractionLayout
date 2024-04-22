@@ -151,6 +151,9 @@ bool WidgetResizeHandler::eventFilter(QObject *o, QEvent *ee) {
         return true;
       }
     } break;
+    case QEvent::Leave: {
+      widget->releaseMouse();
+    } break;
     // case QEvent::KeyPress:
     //   keyPressEvent(static_cast<QKeyEvent *>(ee));
     //   break;
@@ -313,7 +316,9 @@ void WidgetResizeHandler::setMouseCursor(MousePosition m) {
   //     }
   //   }
   // }
-
+  if (m != Center || m != Nowhere) {
+    widget->grabMouse();
+  }
   switch (m) {
     case TopLeft:
     case BottomRight:
@@ -332,6 +337,7 @@ void WidgetResizeHandler::setMouseCursor(MousePosition m) {
       widget->setCursor(Qt::SizeHorCursor);
       break;
     default:
+      widget->releaseMouse();
       widget->setCursor(Qt::ArrowCursor);
       break;
   }
