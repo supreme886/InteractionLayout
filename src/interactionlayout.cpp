@@ -130,7 +130,7 @@ QLayoutItem *InteractionLayout::unplug(QWidget *widget) {
 
 bool InteractionLayout::plug(QWidget *widget, const QPoint &mousePos) {
   bool plug_success = false;
-  QVarLengthArray<QRect, 4> rectList = getRectForArea(d->m_hover);
+  QVarLengthArray<QRect, 4> rectList = getRectForHoverArea(d->m_hover);
   int targetArea = -1;
   for (int i = 0; i < 4; i++) {
     if (rectList.at(i).contains(parentWidget()->mapFromGlobal(mousePos))) {
@@ -504,6 +504,44 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForHoverArea(
               rect.width() - 400 - horizontalSpacing() * 2, 200);
   }
 
+  return rectList;
+}
+
+QVarLengthArray<QRect, 4> InteractionLayout::getDefaultRectForArea() {
+  QVarLengthArray<QRect, 4> rectList = {QRect(), QRect(), QRect(), QRect()};
+  int lMargin = 0, tMargin = 0, rMargin = 0, bMargin = 0;
+  getContentsMargins(&lMargin, &tMargin, &rMargin, &bMargin);
+  QRect rect = d->m_rect;
+  rect.adjust(lMargin, tMargin, -rMargin, -bMargin);
+
+  QSize top = d->m_widgets_map[Top_Area].size()
+                  ? d->m_widgets_map[Top_Area].at(0)->sizeHint()
+                  : QSize(0, 0);
+  QSize left = d->m_widgets_map[Left_Area].size()
+                   ? d->m_widgets_map[Left_Area].at(0)->sizeHint()
+                   : QSize(0, 0);
+  QSize right = d->m_widgets_map[Right_Area].size()
+                    ? d->m_widgets_map[Right_Area].at(0)->sizeHint()
+                    : QSize(0, 0);
+  QSize bottom = d->m_widgets_map[Bottom_Area].size()
+                     ? d->m_widgets_map[Bottom_Area].at(0)->sizeHint()
+                     : QSize(0, 0);
+
+  QRect center = rect.adjusted(200, 200, -200, -200);
+  qDebug() << Q_FUNC_INFO << center;
+
+  QRect top_rect = QRect(rect.left(), rect.top(), rect.width(), top.height());
+  QRect left_rect =
+      QRect(rect.left(), center.top(), left.width(), center.height());
+  QRect right_rect =
+      QRect(center.right(), center.top(), right.width(), center.height());
+  QRect bottom_rect =
+      QRect(rect.left(), center.bottom(), rect.width(), bottom.height());
+
+  rectList[Left_Area] = left_rect;
+  rectList[Top_Area] = top_rect;
+  rectList[Right_Area] = right_rect;
+  rectList[Bottom_Area] = bottom_rect;
   return rectList;
 }
 

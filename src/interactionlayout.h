@@ -97,6 +97,8 @@ class InteractionLayout : public QLayout, public LayoutInterface {
   QVarLengthArray<QRect, 4> getRectForArea(Area hover_area);
 
   QVarLengthArray<QRect, 4> getRectForHoverArea(Area hover_area);
+
+  QVarLengthArray<QRect, 4> getDefaultRectForArea();
 };
 
 class InteractionItem : public QWidgetItemV2 {

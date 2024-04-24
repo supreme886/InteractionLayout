@@ -43,6 +43,15 @@ Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget) {
   lw->setStyleSheet("background: blue;");
   layout->addWidgetByArea(Left_Area, lw);
 
+  QVBoxLayout *l = new QVBoxLayout(lw);
+  l->setContentsMargins(10, 10, 10, 10);
+  l->setSpacing(2);
+  l->addWidget(new QLabel("QLabel 1"));
+  l->addWidget(new QLabel("QLabel 1"));
+  l->addWidget(new QPushButton("QPushButton"));
+  l->addWidget(new QLabel("QLabel 1"));
+  l->addWidget(new QLabel("QLabel 1"));
+
   QHBoxLayout *ilayout = new QHBoxLayout(lw);
   ilayout->addWidget(new QLabel(windowTitle()));
 
