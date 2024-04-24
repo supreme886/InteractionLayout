@@ -3,6 +3,8 @@
 
 #include <QObject>
 
+#include "global.h"
+
 class QMouseEvent;
 class QKeyEvent;
 
@@ -40,19 +42,6 @@ class WidgetResizeHandler : public QObject {
 
  private:
   Q_DISABLE_COPY_MOVE(WidgetResizeHandler)
-
-  enum MousePosition {
-    Nowhere,
-    TopLeft,
-    BottomRight,
-    BottomLeft,
-    TopRight,
-    Top,
-    Bottom,
-    Left,
-    Right,
-    Center
-  };
 
   QWidget *widget;
   QWidget *childWidget;

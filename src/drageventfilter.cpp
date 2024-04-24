@@ -88,7 +88,7 @@ void DragEventFilter::endDrag(QEvent *event) {
     d->m_targetWidget->releaseMouse();
     d->m_targetWidget->removeEventFilter(this);
     if (DragManager::instance()->widgetPlug(
-            d->m_targetWidget->layout()->takeAt(0)->widget(), QCursor::pos())) {
+            d->m_targetWidget->layout()->itemAt(0)->widget(), QCursor::pos())) {
       d->m_targetWidget->deleteLater();
       d->m_targetWidget = nullptr;
     }

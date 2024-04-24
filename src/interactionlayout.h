@@ -9,6 +9,8 @@
 #include <QStyle>
 #include <QVarLengthArray>
 
+#include "global.h"
+
 class InteractionLayoutPrivate;
 
 /**
@@ -18,14 +20,6 @@ class InteractionLayoutPrivate;
  */
 class LayoutInterface {
  public:
-  enum Area { Left_Area = 0, Right_Area, Top_Area, Bottom_Area, UnDefine_Area };
-  enum Corner {
-    Left_Top_Corner = 0,
-    Right_Top_Corner,
-    Left_Bottom_Corner,
-    Right_Bottom_Corner
-  };
-
   /**
    *    将widget添加到指定的边缘区域
    *
@@ -101,6 +95,8 @@ class InteractionLayout : public QLayout, public LayoutInterface {
    * @return
    */
   QVarLengthArray<QRect, 4> getRectForArea(Area hover_area);
+
+  QVarLengthArray<QRect, 4> getRectForHoverArea(Area hover_area);
 };
 
 class InteractionItem : public QWidgetItemV2 {

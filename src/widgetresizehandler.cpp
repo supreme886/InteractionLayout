@@ -13,6 +13,26 @@
 static bool resizeHorizontalDirectionFixed = false;
 static bool resizeVerticalDirectionFixed = false;
 
+static QList<MousePosition> getMousePositionByArea(int area) {
+  QList<MousePosition> postitionList;
+  switch (area) {
+    case Left_Area:
+      postitionList << Right << Top;
+      break;
+    case Right_Area:
+      postitionList << Left << Top;
+      break;
+    case Top_Area:
+      postitionList << Right << Top;
+      break;
+    case Bottom_Area:
+      postitionList << Right << Top;
+      break;
+    default:
+      break;
+  }
+};
+
 QSize qSmartMinSize(const QWidget *w) {
   const QSize &sizeHint = w->sizeHint();
   const QSize &minSizeHint = w->minimumSizeHint();
@@ -114,6 +134,9 @@ bool WidgetResizeHandler::eventFilter(QObject *o, QEvent *ee) {
         buttonDown = true;
         moveOffset = widget->mapFromGlobal(e->globalPos());
         invertedMoveOffset = widget->rect().bottomRight() - moveOffset;
+        if (mode != Center && mode != Nowhere) {
+          widget->grabMouse();
+        }
         if (mode == Center) {
           if (movingEnabled) return true;
         } else {
@@ -153,6 +176,7 @@ bool WidgetResizeHandler::eventFilter(QObject *o, QEvent *ee) {
     } break;
     case QEvent::Leave: {
       widget->releaseMouse();
+      widget->setCursor(Qt::ArrowCursor);
     } break;
     // case QEvent::KeyPress:
     //   keyPressEvent(static_cast<QKeyEvent *>(ee));
@@ -196,6 +220,11 @@ void WidgetResizeHandler::mouseMoveEvent(QMouseEvent *e) {
       mode = Center;
     else
       mode = Nowhere;
+
+    // QVariant area = widget->property("Area");
+    // if (area.isValid() && area.toInt() != mode) {
+    //   mode = Nowhere;
+    // }
 
     if (widget->isMinimized() || !isActive(Resize)) mode = Center;
     setMouseCursor(mode);
@@ -316,9 +345,6 @@ void WidgetResizeHandler::setMouseCursor(MousePosition m) {
   //     }
   //   }
   // }
-  if (m != Center || m != Nowhere) {
-    widget->grabMouse();
-  }
   switch (m) {
     case TopLeft:
     case BottomRight:
@@ -337,7 +363,6 @@ void WidgetResizeHandler::setMouseCursor(MousePosition m) {
       widget->setCursor(Qt::SizeHorCursor);
       break;
     default:
-      widget->releaseMouse();
       widget->setCursor(Qt::ArrowCursor);
       break;
   }

@@ -14,6 +14,28 @@ enum DragState {
   DraggingFloatingWidget
 };
 
+enum MousePosition {
+  Left = 0,
+  Right,
+  Top,
+  Bottom,
+  TopLeft,
+  BottomRight,
+  BottomLeft,
+  TopRight,
+  Center,
+  Nowhere
+};
+
+enum Area { Left_Area = 0, Right_Area, Top_Area, Bottom_Area, UnDefine_Area };
+
+enum Corner {
+  Left_Top_Corner = 0,
+  Right_Top_Corner,
+  Left_Bottom_Corner,
+  Right_Bottom_Corner
+};
+
 struct TabInfoStruct {
   TabInfoStruct(QPointer<BaseSubWidget> w)
       : m_tagWidget(w),

@@ -26,22 +26,22 @@ Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget) {
   BaseSubWidget *tw = new BaseSubWidget(this);
   tw->resize(200, 300);
   tw->setStyleSheet("background: red;");
-  layout->addWidgetByArea(LayoutInterface::Top_Area, tw);
+  layout->addWidgetByArea(Top_Area, tw);
 
   BaseSubWidget *rw = new BaseSubWidget(this);
   rw->resize(200, 300);
   rw->setStyleSheet("background: green;");
-  layout->addWidgetByArea(LayoutInterface::Right_Area, rw);
+  layout->addWidgetByArea(Right_Area, rw);
 
   BaseSubWidget *bw = new BaseSubWidget(this);
   bw->resize(200, 300);
   bw->setStyleSheet("background: lightgray;");
-  layout->addWidgetByArea(LayoutInterface::Bottom_Area, bw);
+  layout->addWidgetByArea(Bottom_Area, bw);
 
   BaseSubWidget *lw = new BaseSubWidget(this);
   lw->resize(100, 200);
   lw->setStyleSheet("background: blue;");
-  layout->addWidgetByArea(LayoutInterface::Left_Area, lw);
+  layout->addWidgetByArea(Left_Area, lw);
 
   QHBoxLayout *ilayout = new QHBoxLayout(lw);
   ilayout->addWidget(new QLabel(windowTitle()));
