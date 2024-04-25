@@ -63,11 +63,6 @@ QSize qSmartMinSize(const QWidget *w) {
   return s.expandedTo(QSize(0, 0));
 }
 
-// ### fixme: Qt 6: No longer export WidgetResizeHandler and remove "Move"
-// functionality. Currently, only the resize functionality is used by
-// QDockWidget. Historically, the class was used in Qt 3's QWorkspace
-// (predecessor to QMdiArea).
-
 WidgetResizeHandler::WidgetResizeHandler(QWidget *parent, QWidget *cw)
     : QObject(parent),
       widget(parent),
@@ -334,9 +329,6 @@ void WidgetResizeHandler::mouseMoveEvent(QMouseEvent *e) {
 }
 
 void WidgetResizeHandler::setMouseCursor(MousePosition m) {
-#ifdef QT_NO_CURSOR
-  Q_UNUSED(m);
-#else
   // QObjectList children = widget->children();
   // for (int i = 0; i < children.size(); ++i) {
   //   if (QWidget *w = qobject_cast<QWidget *>(children.at(i))) {
@@ -366,7 +358,6 @@ void WidgetResizeHandler::setMouseCursor(MousePosition m) {
       widget->setCursor(Qt::ArrowCursor);
       break;
   }
-#endif  // QT_NO_CURSOR
 }
 
 // void WidgetResizeHandler::keyPressEvent(QKeyEvent *e) {
@@ -507,12 +498,8 @@ void WidgetResizeHandler::doResize() {
       mode = BottomRight;
   }
   invertedMoveOffset = widget->rect().bottomRight() - moveOffset;
-#ifndef QT_NO_CURSOR
   setMouseCursor(mode);
   widget->grabMouse(widget->cursor());
-#else
-  widget->grabMouse();
-#endif
   widget->grabKeyboard();
   resizeHorizontalDirectionFixed = false;
   resizeVerticalDirectionFixed = false;
@@ -525,10 +512,6 @@ void WidgetResizeHandler::doMove() {
   moveResizeMode = true;
   moveOffset = widget->mapFromGlobal(QCursor::pos());
   invertedMoveOffset = widget->rect().bottomRight() - moveOffset;
-#ifndef QT_NO_CURSOR
   widget->grabMouse(Qt::SizeAllCursor);
-#else
-  widget->grabMouse();
-#endif
   widget->grabKeyboard();
 }

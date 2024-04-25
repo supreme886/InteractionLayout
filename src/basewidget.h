@@ -22,13 +22,18 @@ class BaseSubWidget : public QFrame {
 
   TabInfoStruct *getTabInfoStruct();
 
+  void setCanspliting(bool canSpliting);
+  bool isCanSpliting();
+
+  void setCanResize(bool canResize);
+  bool isCanResize();
+
  protected:
   bool event(QEvent *event) override;
   void mousePressEvent(QMouseEvent *e) override;
   void mouseReleaseEvent(QMouseEvent *e) override;
   void mouseMoveEvent(QMouseEvent *e) override;
   void resizeEvent(QResizeEvent *e) override;
-  // void paintEvent(QPaintEvent *event) override;
 
  private:
   void unPlugSelf();

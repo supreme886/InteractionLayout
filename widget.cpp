@@ -21,9 +21,10 @@ Widget::Widget(QWidget *parent) : QWidget(parent), ui(new Ui::Widget) {
   ui->setupUi(this);
 
   InteractionLayout *layout = new InteractionLayout(this);
-  layout->setContentsMargins(10, 0, 0, 0);
+  layout->setContentsMargins(10, 10, 10, 10);
 
   BaseSubWidget *tw = new BaseSubWidget(this);
+  // tw->setCanspliting(false);
   tw->resize(200, 300);
   tw->setStyleSheet("background: red;");
   layout->addWidgetByArea(Top_Area, tw);

@@ -43,6 +43,7 @@ struct TabInfoStruct {
   QPointer<BaseSubWidget> m_tagWidget;
   QIcon m_Icon;
   QString m_titleName{"Null"};
+  bool m_canSpliting{true};
 };
 
 #endif  // GLOBAL_H

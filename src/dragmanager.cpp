@@ -19,6 +19,7 @@ struct DragManagerPrivate {
   QList<FloatingWidgetContainer *> floatingwidgets;
   int m_DragDistance{6};
   QSharedPointer<DragEventFilter> m_dragfilter;
+  bool m_can_popUp{true};
 };
 
 DragManager::DragManager(Supre *parent)
@@ -38,7 +39,8 @@ void DragManager::moveAndHover(QWidget *w, const QPoint &pos) {
     InteractionLayout *layout =
         qobject_cast<InteractionLayout *>(item->layout());
     if (layout) {
-      if (item->geometry().contains(pos)) {
+      QRect geom(item->mapToGlobal(QPoint(0, 0)), item->size());
+      if (geom.contains(pos)) {
         layout->hover(w, pos);
       } else {
         layout->setGapIndicatorHide();
@@ -49,7 +51,8 @@ void DragManager::moveAndHover(QWidget *w, const QPoint &pos) {
 
 bool DragManager::widgetPlug(QWidget *w, const QPoint &pos) {
   foreach (QWidget *item, d->hasDragFeatureWidgets) {
-    if (item->isVisible() && item->geometry().contains(pos)) {
+    QRect geom(item->mapToGlobal(QPoint(0, 0)), item->size());
+    if (item->isVisible() && geom.contains(pos)) {
       InteractionLayout *layout =
           dynamic_cast<InteractionLayout *>(item->layout());
       if (layout) {

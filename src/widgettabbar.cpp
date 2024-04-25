@@ -52,6 +52,7 @@ bool WidgetTabBar::addWidgetTab(TabInfoStruct *tab) {
 bool WidgetTabBar::insertWidgetTab(int index, TabInfoStruct *tabinfo) {
   if (tabinfo && (index >= 0 || index < d->m_tabListFrameLayout->count())) {
     WidgetTab *tab = new WidgetTab(tabinfo);
+    tab->setCanspliting(tabinfo->m_canSpliting);
     connect(tab, &IWidgetTab::clicked, this, &WidgetTabBar::onTabClicked);
     connect(tab, &IWidgetTab::closed, this, &WidgetTabBar::onTabClosed);
     connect(tab, &IWidgetTab::tabsplit, this, &WidgetTabBar::onTabSplit);

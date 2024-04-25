@@ -21,6 +21,9 @@ class IWidgetTab : public QAbstractButton {
   QIcon getIcon();
   QString titleName();
 
+  void setCanspliting(bool canSpliting);
+  bool isCanSpliting();
+
  protected:
   virtual void mousePressEvent(QMouseEvent* e) override;
   virtual void mouseReleaseEvent(QMouseEvent* e) override;

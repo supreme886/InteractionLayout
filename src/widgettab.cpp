@@ -20,11 +20,16 @@ struct WidgetTabPrivate {
 
   bool isDraggingState(DragState dragState);
 
+  void setCanSpliting(bool canSplitig);
+
+  bool isCanSpliting();
+
   IWidgetTab *_this{nullptr};
   QPoint GlobalDragStartMousePosition;
   QPoint DragStartMousePosition;
   DragState m_DragState;
   TabInfoStruct *m_tabInfo;
+  bool m_can_spliting{true};
 };
 
 WidgetTabPrivate::WidgetTabPrivate(IWidgetTab *_pub, TabInfoStruct *info)
@@ -38,6 +43,12 @@ void WidgetTabPrivate::saveDragStartMousePosition(const QPoint &GlobalPos) {
 bool WidgetTabPrivate::isDraggingState(DragState dragState) {
   return m_DragState == dragState;
 }
+
+void WidgetTabPrivate::setCanSpliting(bool canSplitig) {
+  m_can_spliting = canSplitig;
+}
+
+bool WidgetTabPrivate::isCanSpliting() { return m_can_spliting; }
 
 IWidgetTab::IWidgetTab(TabInfoStruct *tab, QWidget *parent)
     : Super(parent), d(new WidgetTabPrivate(this, tab)) {
@@ -57,11 +68,19 @@ QIcon IWidgetTab::getIcon() { return d->m_tabInfo->m_Icon; }
 
 QString IWidgetTab::titleName() { return d->m_tabInfo->m_titleName; }
 
+void IWidgetTab::setCanspliting(bool canSpliting) {
+  d->setCanSpliting(canSpliting);
+}
+
+bool IWidgetTab::isCanSpliting() { return d->isCanSpliting(); }
+
 void IWidgetTab::mousePressEvent(QMouseEvent *e) {
   if (e->button() == Qt::LeftButton) {
-    e->accept();
-    d->saveDragStartMousePosition(e->globalPos());
-    d->m_DragState = DraggingMousePressed;
+    if (isCanSpliting()) {
+      e->accept();
+      d->saveDragStartMousePosition(e->globalPos());
+      d->m_DragState = DraggingMousePressed;
+    }
     setChecked(!isChecked());
     Q_EMIT clicked();
     return;
@@ -70,7 +89,7 @@ void IWidgetTab::mousePressEvent(QMouseEvent *e) {
 }
 
 void IWidgetTab::mouseReleaseEvent(QMouseEvent *e) {
-  if (e->button() == Qt::LeftButton) {
+  if (isCanSpliting() && e->button() == Qt::LeftButton) {
     auto CurrentDragState = d->m_DragState;
     d->GlobalDragStartMousePosition = QPoint();
     d->DragStartMousePosition = QPoint();
@@ -93,20 +112,22 @@ void IWidgetTab::mouseReleaseEvent(QMouseEvent *e) {
 }
 
 void IWidgetTab::mouseMoveEvent(QMouseEvent *e) {
-  if (!(e->buttons() & Qt::LeftButton) ||
-      d->isDraggingState(DraggingInactive)) {
-    d->m_DragState = DraggingInactive;
-    Super::mouseMoveEvent(e);
-    return;
-  }
+  if (isCanSpliting()) {
+    if (!(e->buttons() & Qt::LeftButton) ||
+        d->isDraggingState(DraggingInactive)) {
+      d->m_DragState = DraggingInactive;
+      Super::mouseMoveEvent(e);
+      return;
+    }
 
-  QPoint point = e->pos() - d->DragStartMousePosition;
-  if (d->isDraggingState(DraggingMousePressed) &&
-      point.manhattanLength() > 10) {
-    if (d->m_tabInfo->m_tagWidget) {
-      d->m_tabInfo->m_tagWidget->startSplits();
-      d->m_DragState = DraggingTab;
-      Q_EMIT tabsplit();
+    QPoint point = e->pos() - d->DragStartMousePosition;
+    if (d->isDraggingState(DraggingMousePressed) &&
+        point.manhattanLength() > 10) {
+      if (d->m_tabInfo->m_tagWidget) {
+        d->m_tabInfo->m_tagWidget->startSplits();
+        d->m_DragState = DraggingTab;
+        Q_EMIT tabsplit();
+      }
     }
   }
 

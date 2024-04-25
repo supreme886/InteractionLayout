@@ -19,6 +19,8 @@ struct BaseWidgetPrivate {
 
   void saveDragStartMousePosition(const QPoint &GlobalPos);
 
+  TabInfoStruct *getTabInfo();
+
   BaseSubWidget *_this{nullptr};
   TabInfoStruct *m_widgetTab{nullptr};
   WidgetResizeHandler *m_reszie_handler{nullptr};
@@ -26,12 +28,15 @@ struct BaseWidgetPrivate {
   QPoint m_press_global_point;
   bool m_has_press{false};
   bool m_has_container{false};
+  bool m_can_resize{true};
 };
 
 void BaseWidgetPrivate::saveDragStartMousePosition(const QPoint &GlobalPos) {
   m_press_point = GlobalPos;
   m_press_global_point = _this->mapFromGlobal(GlobalPos);
 }
+
+TabInfoStruct *BaseWidgetPrivate::getTabInfo() { return m_widgetTab; }
 
 BaseSubWidget::BaseSubWidget(QWidget *parent)
     : Super(parent), d(new BaseWidgetPrivate(this)) {
@@ -77,6 +82,18 @@ void BaseSubWidget::setResizeHandle(bool canResize) {
 }
 
 TabInfoStruct *BaseSubWidget::getTabInfoStruct() { return d->m_widgetTab; }
+
+void BaseSubWidget::setCanspliting(bool canSpliting) {
+  getTabInfoStruct()->m_canSpliting = canSpliting;
+}
+
+bool BaseSubWidget::isCanSpliting() {
+  return getTabInfoStruct()->m_canSpliting;
+}
+
+void BaseSubWidget::setCanResize(bool canResize) {}
+
+bool BaseSubWidget::isCanResize() {}
 
 bool BaseSubWidget::event(QEvent *event) {
   switch (event->type()) {
@@ -138,6 +155,3 @@ void BaseSubWidget::unPlugSelf() {
     }
   }
 }
-
-// void BaseSubWidget::paintEvent(QPaintEvent *event) {
-// Super::paintEvent(event); }
