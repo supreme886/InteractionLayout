@@ -21,6 +21,10 @@ struct BaseWidgetPrivate {
 
   TabInfoStruct *getTabInfo();
 
+  void setResizeHandle(bool canResize);
+  void setCanResize(bool canResize);
+  bool isCanResize();
+
   BaseSubWidget *_this{nullptr};
   TabInfoStruct *m_widgetTab{nullptr};
   WidgetResizeHandler *m_reszie_handler{nullptr};
@@ -37,6 +41,21 @@ void BaseWidgetPrivate::saveDragStartMousePosition(const QPoint &GlobalPos) {
 }
 
 TabInfoStruct *BaseWidgetPrivate::getTabInfo() { return m_widgetTab; }
+
+void BaseWidgetPrivate::setResizeHandle(bool canResize) {
+  if (!m_reszie_handler) {
+    m_reszie_handler = new WidgetResizeHandler(_this);
+    m_reszie_handler->setActive(WidgetResizeHandler::Move, false);
+  }
+  // d->m_reszie_handler->setMovingEnabled(canResize);
+  m_reszie_handler->setActive(WidgetResizeHandler::Resize, canResize);
+}
+
+void BaseWidgetPrivate::setCanResize(bool canResize) {
+  m_can_resize = canResize;
+}
+
+bool BaseWidgetPrivate::isCanResize() { return m_can_resize; }
 
 BaseSubWidget::BaseSubWidget(QWidget *parent)
     : Super(parent), d(new BaseWidgetPrivate(this)) {
@@ -73,12 +92,7 @@ FloatingWidgetContainer *BaseSubWidget::startSplits() {
 void BaseSubWidget::endSplits() {}
 
 void BaseSubWidget::setResizeHandle(bool canResize) {
-  if (!d->m_reszie_handler) {
-    d->m_reszie_handler = new WidgetResizeHandler(this);
-    d->m_reszie_handler->setActive(WidgetResizeHandler::Move, false);
-  }
-  // d->m_reszie_handler->setMovingEnabled(canResize);
-  d->m_reszie_handler->setActive(WidgetResizeHandler::Resize, canResize);
+  d->setResizeHandle(canResize);
 }
 
 TabInfoStruct *BaseSubWidget::getTabInfoStruct() { return d->m_widgetTab; }
@@ -91,9 +105,9 @@ bool BaseSubWidget::isCanSpliting() {
   return getTabInfoStruct()->m_canSpliting;
 }
 
-void BaseSubWidget::setCanResize(bool canResize) {}
+void BaseSubWidget::setCanResize(bool canResize) { d->setCanResize(canResize); }
 
-bool BaseSubWidget::isCanResize() {}
+bool BaseSubWidget::isCanResize() { return d->isCanResize(); }
 
 bool BaseSubWidget::event(QEvent *event) {
   switch (event->type()) {
