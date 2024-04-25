@@ -118,13 +118,13 @@ void BaseSubWidget::mouseMoveEvent(QMouseEvent *e) {
 }
 
 void BaseSubWidget::resizeEvent(QResizeEvent *e) {
-  // QWidget *pw = qobject_cast<QWidget *>(parent());
-  // if (pw) {
-  //   InteractionLayout *layout = dynamic_cast<InteractionLayout
-  //   *>(pw->layout()); if (layout) {
-  //     layout->invalidate();
-  //   }
-  // }
+  QWidget *pw = qobject_cast<QWidget *>(parent());
+  if (pw) {
+    InteractionLayout *layout = dynamic_cast<InteractionLayout *>(pw->layout());
+    if (layout) {
+      layout->invalidate();
+    }
+  }
   Super::resizeEvent(e);
 }
 
