@@ -81,8 +81,6 @@ class InteractionLayout : public QLayout, public LayoutInterface {
 
   void setGapIndicatorHide();
 
-  void updateAreaSize();
-
   void setAutoCornerFill(bool filled);
 
  private:

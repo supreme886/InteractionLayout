@@ -237,22 +237,6 @@ void InteractionLayout::setGapIndicatorHide() {
   if (d->gapIndicator) delete d->gapIndicator;
 }
 
-void InteractionLayout::updateAreaSize() {
-  if (d->m_center_wIdget) {
-    d->m_center_wIdget->widget()->lower();
-    d->m_center_wIdget->setGeometry(d->m_rect);
-  }
-
-  QVarLengthArray<QRect, 4> rectList = getRectForArea();
-  for (auto iter = d->m_widgets_map.begin(); iter != d->m_widgets_map.end();
-       iter++) {
-    if (iter.value().size() && iter.key() < rectList.size()) {
-      iter.value().at(0)->setGeometry(rectList.at(iter.key()));
-    }
-  }
-  d->m_first_flag = false;
-}
-
 void InteractionLayout::setAutoCornerFill(bool filled) {}
 
 int InteractionLayout::smartSpacing(QStyle::PixelMetric pm) const {
