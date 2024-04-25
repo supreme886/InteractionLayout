@@ -9,16 +9,19 @@
 
 class InteractionLayoutPrivate {
  public:
-  InteractionLayoutPrivate() {
+  InteractionLayoutPrivate(InteractionLayout *pub) : m_this(pub) {
     m_corner_belong.insert(Left_Top_Corner, Top_Area);
-    m_corner_belong.insert(Right_Top_Corner, Right_Area);
+    m_corner_belong.insert(Right_Top_Corner, Top_Area);
     m_corner_belong.insert(Right_Bottom_Corner, Bottom_Area);
     m_corner_belong.insert(Left_Bottom_Corner, Left_Area);
   }
 
   void setCenterWidget(QLayoutItem *) const;
   QLayoutItem *getCenterWidget() const;
+  bool autoCornerFilled();
+  void setAutoCornerFilled(bool val);
 
+  InteractionLayout *m_this{nullptr};
   mutable QLayoutItem *m_center_wIdget{nullptr};
   QMap<Area, QList<QWidgetItemV2 *>> m_widgets_map;
   QMap<Corner, Area> m_corner_belong;
@@ -28,6 +31,7 @@ class InteractionLayoutPrivate {
   Area m_hover{UnDefine_Area};
   QPointer<QRubberBand> gapIndicator;
   bool m_first_flag{true};
+  bool m_auto_corner_fill{true};
 };
 
 void InteractionLayoutPrivate::setCenterWidget(QLayoutItem *item) const {
@@ -42,13 +46,20 @@ QLayoutItem *InteractionLayoutPrivate::getCenterWidget() const {
   return m_center_wIdget;
 }
 
+bool InteractionLayoutPrivate::autoCornerFilled() { return m_auto_corner_fill; }
+
+void InteractionLayoutPrivate::setAutoCornerFilled(bool val) {
+  m_auto_corner_fill = val;
+  m_this->invalidate();
+}
+
 InteractionLayout::InteractionLayout(QWidget *parent)
-    : QLayout(parent), d(new InteractionLayoutPrivate) {
+    : QLayout(parent), d(new InteractionLayoutPrivate(this)) {
   DragManager::instance()->addDragFeaturesWidget(parent);
 }
 
 InteractionLayout::InteractionLayout()
-    : QLayout(0), d(new InteractionLayoutPrivate) {}
+    : QLayout(0), d(new InteractionLayoutPrivate(this)) {}
 
 InteractionLayout::~InteractionLayout() {}
 
@@ -69,7 +80,7 @@ void InteractionLayout::setGeometry(const QRect &r) {
     d->m_center_wIdget->setGeometry(r);
   }
 
-  QVarLengthArray<QRect, 4> rectList = getRectForArea(d->m_hover);
+  QVarLengthArray<QRect, 4> rectList = getRectForArea();
   for (auto iter = d->m_widgets_map.begin(); iter != d->m_widgets_map.end();
        iter++) {
     if (iter.value().size() && iter.key() < rectList.size()) {
@@ -130,7 +141,7 @@ QLayoutItem *InteractionLayout::unplug(QWidget *widget) {
 
 bool InteractionLayout::plug(QWidget *widget, const QPoint &mousePos) {
   bool plug_success = false;
-  QVarLengthArray<QRect, 4> rectList = getRectForArea(d->m_hover);
+  QVarLengthArray<QRect, 4> rectList = getRectForArea();
   int targetArea = -1;
   for (int i = 0; i < 4; i++) {
     if (rectList.at(i).contains(parentWidget()->mapFromGlobal(mousePos))) {
@@ -159,11 +170,13 @@ bool InteractionLayout::plug(QWidget *widget, const QPoint &mousePos) {
 
 void InteractionLayout::hover(QWidget *widget, const QPoint &mousePos,
                               bool isMoving) {
-  QVarLengthArray<QRect, 4> rectList = getRectForArea(d->m_hover);
+  // QSize oldSize = widget->size();
+  QVarLengthArray<QRect, 4> rectList = getRectForArea();
   int targetArea = -1;
   for (int i = 0; i < 4; i++) {
     if (rectList.at(i).contains(parentWidget()->mapFromGlobal(mousePos))) {
       targetArea = i;
+      // widget->resize(rectList.at(i).size());
     }
   }
 
@@ -175,6 +188,7 @@ void InteractionLayout::hover(QWidget *widget, const QPoint &mousePos,
     d->gapIndicator->show();
     d->gapIndicator->raise();
   } else {
+    // widget->resize(oldSize);
     if (d->gapIndicator) {
       delete d->gapIndicator;
     }
@@ -229,7 +243,7 @@ void InteractionLayout::updateAreaSize() {
     d->m_center_wIdget->setGeometry(d->m_rect);
   }
 
-  QVarLengthArray<QRect, 4> rectList = getRectForArea(d->m_hover);
+  QVarLengthArray<QRect, 4> rectList = getRectForArea();
   for (auto iter = d->m_widgets_map.begin(); iter != d->m_widgets_map.end();
        iter++) {
     if (iter.value().size() && iter.key() < rectList.size()) {
@@ -238,6 +252,8 @@ void InteractionLayout::updateAreaSize() {
   }
   d->m_first_flag = false;
 }
+
+void InteractionLayout::setAutoCornerFill(bool filled) {}
 
 int InteractionLayout::smartSpacing(QStyle::PixelMetric pm) const {
   QObject *parent = this->parent();
@@ -256,13 +272,14 @@ void InteractionLayout::setWidgetIntoArea(QWidget *widget,
   addWidgetByArea(Left_Area, widget);
 }
 
-QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea(Area hover_area) {
+QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea() {
   QVarLengthArray<QRect, 4> rectList = {QRect(), QRect(), QRect(), QRect()};
   int lMargin = 0, tMargin = 0, rMargin = 0, bMargin = 0;
   getContentsMargins(&lMargin, &tMargin, &rMargin, &bMargin);
   QRect rect = d->m_rect;
   rect.adjust(lMargin, tMargin, -rMargin, -bMargin);
 
+  bool auto_filled = d->autoCornerFilled();
   QSize left_size(200, 200);
   QSize top_size(200, 200);
   QSize right_size(200, 200);
@@ -297,7 +314,7 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea(Area hover_area) {
     rectList[Left_Area] =
         QRect(lMargin, tMargin, left_size.width(), rect.height());
   } else if (d->m_corner_belong[Left_Top_Corner] == Left_Area) {
-    if (d->m_widgets_map[Bottom_Area].isEmpty())
+    if (auto_filled && d->m_widgets_map[Bottom_Area].isEmpty())
       rectList[Left_Area] =
           QRect(lMargin, tMargin, left_size.width(), rect.height());
     else
@@ -305,7 +322,7 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea(Area hover_area) {
           QRect(lMargin, tMargin, left_size.width(),
                 rect.height() - bottom_size.height() - verticalSpacing());
   } else if (d->m_corner_belong[Left_Bottom_Corner] == Left_Area) {
-    if (d->m_widgets_map[Top_Area].isEmpty())
+    if (auto_filled && d->m_widgets_map[Top_Area].isEmpty())
       rectList[Left_Area] =
           QRect(lMargin, tMargin, left_size.width(), rect.height());
     else
@@ -314,10 +331,24 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea(Area hover_area) {
                 left_size.width(),
                 rect.height() - top_size.height() - verticalSpacing());
   } else {
-    rectList[Left_Area] =
+    QRect initial_rect =
         QRect(lMargin, tMargin + top_size.height() + verticalSpacing(),
               left_size.width(),
-              rect.bottom() - bottom_size.height() - verticalSpacing() * 2);
+              rect.height() - bottom_size.height() - top_size.height() -
+                  verticalSpacing() * 2);
+    if (auto_filled) {
+      if (d->m_widgets_map[Bottom_Area].isEmpty() &&
+          d->m_widgets_map[Top_Area].isEmpty()) {
+        initial_rect.setTop(rect.top());
+        initial_rect.setHeight(rect.height());
+      } else if (d->m_widgets_map[Bottom_Area].isEmpty()) {
+        initial_rect.setHeight(rect.height() - bottom_size.height());
+      } else if (d->m_widgets_map[Top_Area].isEmpty()) {
+        initial_rect.setTop(rect.top());
+        initial_rect.setHeight(rect.height() - bottom_size.height());
+      }
+    }
+    rectList[Left_Area] = initial_rect;
   }
 
   if (d->m_corner_belong[Right_Top_Corner] == Right_Area &&
@@ -325,7 +356,7 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea(Area hover_area) {
     rectList[Right_Area] = QRect(rect.right() - right_size.width(), tMargin,
                                  right_size.width(), rect.height());
   } else if (d->m_corner_belong[Right_Top_Corner] == Right_Area) {
-    if (d->m_widgets_map[Bottom_Area].isEmpty())
+    if (auto_filled && d->m_widgets_map[Bottom_Area].isEmpty())
       rectList[Right_Area] = QRect(rect.right() - right_size.width(), tMargin,
                                    right_size.width(), rect.height());
     else
@@ -333,7 +364,7 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea(Area hover_area) {
           QRect(rect.right() - right_size.width(), tMargin, right_size.width(),
                 rect.height() - bottom_size.height() - verticalSpacing());
   } else if (d->m_corner_belong[Right_Bottom_Corner] == Right_Area) {
-    if (d->m_widgets_map[Top_Area].isEmpty())
+    if (auto_filled && d->m_widgets_map[Top_Area].isEmpty())
       rectList[Right_Area] = QRect(rect.right() - right_size.width(), tMargin,
                                    right_size.width(), rect.height());
     else
@@ -342,10 +373,24 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea(Area hover_area) {
           tMargin - top_size.height() - verticalSpacing(), right_size.width(),
           rect.height() - top_size.height() - verticalSpacing());
   } else {
-    rectList[Right_Area] =
-        QRect(rect.right() - right_size.width(), rect.top() + top_size.height(),
-              right_size.width(),
-              rect.bottom() - bottom_size.height() - verticalSpacing() * 2);
+    QRect initial_rect = QRect(
+        rect.right() - right_size.width(),
+        rect.top() + top_size.height() + verticalSpacing(), right_size.width(),
+        rect.height() - bottom_size.height() - top_size.height() -
+            verticalSpacing() * 2);
+    if (auto_filled) {
+      if (d->m_widgets_map[Bottom_Area].isEmpty() &&
+          d->m_widgets_map[Top_Area].isEmpty()) {
+        initial_rect.setTop(rect.top());
+        initial_rect.setHeight(rect.height());
+      } else if (d->m_widgets_map[Bottom_Area].isEmpty()) {
+        initial_rect.setHeight(rect.height() - bottom_size.height());
+      } else if (d->m_widgets_map[Top_Area].isEmpty()) {
+        initial_rect.setTop(rect.top());
+        initial_rect.setHeight(rect.height() - bottom_size.height());
+      }
+    }
+    rectList[Right_Area] = initial_rect;
   }
 
   if (d->m_corner_belong[Left_Top_Corner] == Top_Area &&
@@ -353,7 +398,7 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea(Area hover_area) {
     rectList[Top_Area] =
         QRect(lMargin, tMargin, rect.width(), top_size.height());
   } else if (d->m_corner_belong[Left_Top_Corner] == Top_Area) {
-    if (d->m_widgets_map[Right_Area].isEmpty())
+    if (auto_filled && d->m_widgets_map[Right_Area].isEmpty())
       rectList[Top_Area] =
           QRect(lMargin, tMargin, rect.width(), top_size.height());
     else
@@ -362,7 +407,7 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea(Area hover_area) {
                 rect.width() - right_size.width() - horizontalSpacing(),
                 top_size.height());
   } else if (d->m_corner_belong[Right_Top_Corner] == Top_Area) {
-    if (d->m_widgets_map[Left_Area].isEmpty())
+    if (auto_filled && d->m_widgets_map[Left_Area].isEmpty())
       rectList[Top_Area] =
           QRect(lMargin, tMargin, rect.width(), top_size.height());
     else
@@ -371,10 +416,23 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea(Area hover_area) {
                 rect.width() - left_size.width() - horizontalSpacing(),
                 top_size.height());
   } else {
-    rectList[Top_Area] =
-        QRect(lMargin + 200 + horizontalSpacing(), tMargin,
-              rect.right() - right_size.width() - horizontalSpacing() * 2,
-              top_size.height());
+    QRect initial_rect = QRect(lMargin + 200 + horizontalSpacing(), tMargin,
+                               rect.width() - right_size.width() -
+                                   left_size.width() - horizontalSpacing() * 2,
+                               top_size.height());
+    if (auto_filled) {
+      if (d->m_widgets_map[Left_Area].isEmpty() &&
+          d->m_widgets_map[Right_Area].isEmpty()) {
+        initial_rect.setLeft(rect.left());
+        initial_rect.setHeight(rect.width());
+      } else if (d->m_widgets_map[Right_Area].isEmpty()) {
+        initial_rect.setWidth(rect.width() - left_size.width());
+      } else if (d->m_widgets_map[Left_Area].isEmpty()) {
+        initial_rect.setLeft(rect.left());
+        initial_rect.setWidth(rect.width() - right_size.height());
+      }
+    }
+    rectList[Top_Area] = initial_rect;
   }
 
   if (d->m_corner_belong[Left_Bottom_Corner] == Bottom_Area &&
@@ -382,7 +440,7 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea(Area hover_area) {
     rectList[Bottom_Area] = QRect(lMargin, rect.bottom() - bottom_size.height(),
                                   rect.width(), bottom_size.height());
   } else if (d->m_corner_belong[Left_Bottom_Corner] == Bottom_Area) {
-    if (d->m_widgets_map[Right_Area].isEmpty())
+    if (auto_filled && d->m_widgets_map[Right_Area].isEmpty())
       rectList[Bottom_Area] =
           QRect(lMargin, rect.bottom() - bottom_size.height(), rect.width(),
                 bottom_size.height());
@@ -392,7 +450,7 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea(Area hover_area) {
                 rect.width() - right_size.width() - horizontalSpacing(),
                 bottom_size.height());
   } else if (d->m_corner_belong[Right_Bottom_Corner] == Bottom_Area) {
-    if (d->m_widgets_map[Left_Area].isEmpty())
+    if (auto_filled && d->m_widgets_map[Left_Area].isEmpty())
       rectList[Bottom_Area] =
           QRect(lMargin, rect.bottom() - bottom_size.height(), rect.width(),
                 bottom_size.height());
@@ -403,11 +461,25 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea(Area hover_area) {
                 rect.width() - left_size.width() - horizontalSpacing(),
                 bottom_size.height());
   } else {
-    rectList[Bottom_Area] =
+    QRect initial_rect =
         QRect(lMargin + left_size.width() + horizontalSpacing(),
               rect.bottom() - bottom_size.height(),
-              rect.right() - right_size.width() - horizontalSpacing() * 2,
+              rect.width() - right_size.width() - left_size.width() -
+                  horizontalSpacing() * 2,
               bottom_size.height());
+    if (auto_filled) {
+      if (d->m_widgets_map[Left_Area].isEmpty() &&
+          d->m_widgets_map[Right_Area].isEmpty()) {
+        initial_rect.setLeft(rect.left());
+        initial_rect.setHeight(rect.width());
+      } else if (d->m_widgets_map[Right_Area].isEmpty()) {
+        initial_rect.setWidth(rect.width() - left_size.width());
+      } else if (d->m_widgets_map[Left_Area].isEmpty()) {
+        initial_rect.setLeft(rect.left());
+        initial_rect.setWidth(rect.width() - right_size.height());
+      }
+    }
+    rectList[Bottom_Area] = initial_rect;
   }
 
   return rectList;

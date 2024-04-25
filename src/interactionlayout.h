@@ -83,6 +83,8 @@ class InteractionLayout : public QLayout, public LayoutInterface {
 
   void updateAreaSize();
 
+  void setAutoCornerFill(bool filled);
+
  private:
   int smartSpacing(QStyle::PixelMetric pm) const;
 
@@ -96,7 +98,7 @@ class InteractionLayout : public QLayout, public LayoutInterface {
    * 为false,是计算布局应用的区域;为true，计算外部区域hover时应用的区域
    * @return
    */
-  QVarLengthArray<QRect, 4> getRectForArea(Area hover_area);
+  QVarLengthArray<QRect, 4> getRectForArea();
 };
 
 class InteractionItem : public QWidgetItemV2 {
