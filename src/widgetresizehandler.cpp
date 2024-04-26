@@ -216,10 +216,10 @@ void WidgetResizeHandler::mouseMoveEvent(QMouseEvent *e) {
     else
       mode = Nowhere;
 
-    // QVariant area = widget->property("Area");
-    // if (area.isValid() && area.toInt() != mode) {
-    //   mode = Nowhere;
-    // }
+    QVariant area = widget->property("MousePosition");
+    if (area.isValid() && area.toInt() != mode) {
+      mode = Nowhere;
+    }
 
     if (widget->isMinimized() || !isActive(Resize)) mode = Center;
     setMouseCursor(mode);

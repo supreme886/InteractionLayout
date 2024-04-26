@@ -11,7 +11,7 @@ class InteractionLayoutPrivate {
  public:
   InteractionLayoutPrivate(InteractionLayout *pub) : m_this(pub) {
     m_corner_belong.insert(Left_Top_Corner, Top_Area);
-    m_corner_belong.insert(Right_Top_Corner, Top_Area);
+    m_corner_belong.insert(Right_Top_Corner, Right_Area);
     m_corner_belong.insert(Right_Bottom_Corner, Bottom_Area);
     m_corner_belong.insert(Left_Bottom_Corner, Left_Area);
   }
@@ -268,52 +268,112 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea() {
   QSize top_size(200, 200);
   QSize right_size(200, 200);
   QSize bottom_size(200, 200);
+  QSize left_min_size(200, 200);
+  QSize top_min_size(200, 200);
+  QSize right_min_size(200, 200);
+  QSize bottom_min_size(200, 200);
   if (d->m_widgets_map[Left_Area].size()) {
     QWidget *target = d->m_widgets_map[Left_Area].at(0)->widget();
     if (target && target->isVisible()) {
       left_size = target->size();
+      left_min_size = target->minimumSize();
     }
   }
   if (d->m_widgets_map[Top_Area].size()) {
     QWidget *target = d->m_widgets_map[Top_Area].at(0)->widget();
     if (target && target->isVisible()) {
       top_size = target->size();
+      top_min_size = target->minimumSize();
     }
   }
   if (d->m_widgets_map[Right_Area].size()) {
     QWidget *target = d->m_widgets_map[Right_Area].at(0)->widget();
     if (target && target->isVisible()) {
       right_size = target->size();
+      right_min_size = target->minimumSize();
     }
   }
   if (d->m_widgets_map[Bottom_Area].size()) {
     QWidget *target = d->m_widgets_map[Bottom_Area].at(0)->widget();
     if (target && target->isVisible()) {
       bottom_size = target->size();
+      bottom_min_size = target->minimumSize();
     }
   }
 
+  // FIXME 相同逻辑抽函数
   if (d->m_corner_belong[Left_Top_Corner] == Left_Area &&
       d->m_corner_belong[Left_Bottom_Corner] == Left_Area) {
     rectList[Left_Area] =
         QRect(lMargin, tMargin, left_size.width(), rect.height());
+    if (d->m_widgets_map[Left_Area].size()) {
+      d->m_widgets_map[Left_Area].at(0)->widget()->setProperty(
+          "MousePosition", MousePosition::Right);
+      int top_bottom_min_widget = top_min_size.width() < bottom_min_size.width()
+                                      ? bottom_min_size.width()
+                                      : top_min_size.width();
+      d->m_widgets_map[Left_Area].at(0)->widget()->setMaximumWidth(
+          right_min_size.width() + top_bottom_min_widget);
+    }
   } else if (d->m_corner_belong[Left_Top_Corner] == Left_Area) {
-    if (auto_filled && d->m_widgets_map[Bottom_Area].isEmpty())
+    if (auto_filled && d->m_widgets_map[Bottom_Area].isEmpty()) {
       rectList[Left_Area] =
           QRect(lMargin, tMargin, left_size.width(), rect.height());
-    else
+      if (d->m_widgets_map[Left_Area].size()) {
+        d->m_widgets_map[Left_Area].at(0)->widget()->setProperty(
+            "MousePosition", MousePosition::Right);
+        int top_bottom_min_widget =
+            top_min_size.width() < bottom_min_size.width()
+                ? bottom_min_size.width()
+                : top_min_size.width();
+        d->m_widgets_map[Left_Area].at(0)->widget()->setMaximumWidth(
+            right_min_size.width() + top_bottom_min_widget);
+      }
+    } else {
       rectList[Left_Area] =
           QRect(lMargin, tMargin, left_size.width(),
                 rect.height() - bottom_size.height() - verticalSpacing());
+      if (d->m_widgets_map[Left_Area].size()) {
+        d->m_widgets_map[Left_Area].at(0)->widget()->setProperty(
+            "MousePosition", MousePosition::Right);
+        int top_bottom_min_widget =
+            top_min_size.width() < bottom_min_size.width()
+                ? bottom_min_size.width()
+                : top_min_size.width();
+        d->m_widgets_map[Left_Area].at(0)->widget()->setMaximumWidth(
+            right_min_size.width() + top_bottom_min_widget);
+      }
+    }
   } else if (d->m_corner_belong[Left_Bottom_Corner] == Left_Area) {
-    if (auto_filled && d->m_widgets_map[Top_Area].isEmpty())
+    if (auto_filled && d->m_widgets_map[Top_Area].isEmpty()) {
       rectList[Left_Area] =
           QRect(lMargin, tMargin, left_size.width(), rect.height());
-    else
+      if (d->m_widgets_map[Left_Area].size()) {
+        d->m_widgets_map[Left_Area].at(0)->widget()->setProperty(
+            "MousePosition", MousePosition::Right);
+        int top_bottom_min_widget =
+            top_min_size.width() < bottom_min_size.width()
+                ? bottom_min_size.width()
+                : top_min_size.width();
+        d->m_widgets_map[Left_Area].at(0)->widget()->setMaximumWidth(
+            right_min_size.width() + top_bottom_min_widget);
+      }
+    } else {
       rectList[Left_Area] =
           QRect(lMargin, tMargin + top_size.height() + verticalSpacing(),
                 left_size.width(),
                 rect.height() - top_size.height() - verticalSpacing());
+      if (d->m_widgets_map[Left_Area].size()) {
+        d->m_widgets_map[Left_Area].at(0)->widget()->setProperty(
+            "MousePosition", MousePosition::Right);
+        int top_bottom_min_widget =
+            top_min_size.width() < bottom_min_size.width()
+                ? bottom_min_size.width()
+                : top_min_size.width();
+        d->m_widgets_map[Left_Area].at(0)->widget()->setMaximumWidth(
+            right_min_size.width() + top_bottom_min_widget);
+      }
+    }
   } else {
     QRect initial_rect =
         QRect(lMargin, tMargin + top_size.height() + verticalSpacing(),
@@ -325,11 +385,41 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea() {
           d->m_widgets_map[Top_Area].isEmpty()) {
         initial_rect.setTop(rect.top());
         initial_rect.setHeight(rect.height());
+        if (d->m_widgets_map[Left_Area].size()) {
+          d->m_widgets_map[Left_Area].at(0)->widget()->setProperty(
+              "MousePosition", MousePosition::Right);
+          int top_bottom_min_widget =
+              top_min_size.width() < bottom_min_size.width()
+                  ? bottom_min_size.width()
+                  : top_min_size.width();
+          d->m_widgets_map[Left_Area].at(0)->widget()->setMaximumWidth(
+              right_min_size.width() + top_bottom_min_widget);
+        }
       } else if (d->m_widgets_map[Bottom_Area].isEmpty()) {
         initial_rect.setHeight(rect.height() - bottom_size.height());
+        if (d->m_widgets_map[Left_Area].size()) {
+          d->m_widgets_map[Left_Area].at(0)->widget()->setProperty(
+              "MousePosition", MousePosition::Right);
+          int top_bottom_min_widget =
+              top_min_size.width() < bottom_min_size.width()
+                  ? bottom_min_size.width()
+                  : top_min_size.width();
+          d->m_widgets_map[Left_Area].at(0)->widget()->setMaximumWidth(
+              right_min_size.width() + top_bottom_min_widget);
+        }
       } else if (d->m_widgets_map[Top_Area].isEmpty()) {
         initial_rect.setTop(rect.top());
         initial_rect.setHeight(rect.height() - bottom_size.height());
+        if (d->m_widgets_map[Left_Area].size()) {
+          d->m_widgets_map[Left_Area].at(0)->widget()->setProperty(
+              "MousePosition", MousePosition::Right);
+          int top_bottom_min_widget =
+              top_min_size.width() < bottom_min_size.width()
+                  ? bottom_min_size.width()
+                  : top_min_size.width();
+          d->m_widgets_map[Left_Area].at(0)->widget()->setMaximumWidth(
+              right_min_size.width() + top_bottom_min_widget);
+        }
       }
     }
     rectList[Left_Area] = initial_rect;
@@ -339,23 +429,74 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea() {
       d->m_corner_belong[Right_Bottom_Corner] == Right_Area) {
     rectList[Right_Area] = QRect(rect.right() - right_size.width(), tMargin,
                                  right_size.width(), rect.height());
+    if (d->m_widgets_map[Right_Area].size()) {
+      d->m_widgets_map[Right_Area].at(0)->widget()->setProperty(
+          "MousePosition", MousePosition::Left);
+      int top_bottom_min_widget = top_min_size.width() < bottom_min_size.width()
+                                      ? bottom_min_size.width()
+                                      : top_min_size.width();
+      d->m_widgets_map[Right_Area].at(0)->widget()->setMaximumWidth(
+          left_min_size.width() + top_bottom_min_widget);
+    }
   } else if (d->m_corner_belong[Right_Top_Corner] == Right_Area) {
-    if (auto_filled && d->m_widgets_map[Bottom_Area].isEmpty())
+    if (auto_filled && d->m_widgets_map[Bottom_Area].isEmpty()) {
       rectList[Right_Area] = QRect(rect.right() - right_size.width(), tMargin,
                                    right_size.width(), rect.height());
-    else
+      if (d->m_widgets_map[Right_Area].size()) {
+        d->m_widgets_map[Right_Area].at(0)->widget()->setProperty(
+            "MousePosition", MousePosition::Left);
+        int top_bottom_min_widget =
+            top_min_size.width() < bottom_min_size.width()
+                ? bottom_min_size.width()
+                : top_min_size.width();
+        d->m_widgets_map[Right_Area].at(0)->widget()->setMaximumWidth(
+            left_min_size.width() + top_bottom_min_widget);
+      }
+    } else {
       rectList[Right_Area] =
           QRect(rect.right() - right_size.width(), tMargin, right_size.width(),
                 rect.height() - bottom_size.height() - verticalSpacing());
+      if (d->m_widgets_map[Right_Area].size()) {
+        d->m_widgets_map[Right_Area].at(0)->widget()->setProperty(
+            "MousePosition", MousePosition::Left);
+        int top_bottom_min_widget =
+            top_min_size.width() < bottom_min_size.width()
+                ? bottom_min_size.width()
+                : top_min_size.width();
+        d->m_widgets_map[Right_Area].at(0)->widget()->setMaximumWidth(
+            left_min_size.width() + top_bottom_min_widget);
+      }
+    }
   } else if (d->m_corner_belong[Right_Bottom_Corner] == Right_Area) {
-    if (auto_filled && d->m_widgets_map[Top_Area].isEmpty())
+    if (auto_filled && d->m_widgets_map[Top_Area].isEmpty()) {
       rectList[Right_Area] = QRect(rect.right() - right_size.width(), tMargin,
                                    right_size.width(), rect.height());
-    else
+      if (d->m_widgets_map[Right_Area].size()) {
+        d->m_widgets_map[Right_Area].at(0)->widget()->setProperty(
+            "MousePosition", MousePosition::Left);
+        int top_bottom_min_widget =
+            top_min_size.width() < bottom_min_size.width()
+                ? bottom_min_size.width()
+                : top_min_size.width();
+        d->m_widgets_map[Right_Area].at(0)->widget()->setMaximumWidth(
+            left_min_size.width() + top_bottom_min_widget);
+      }
+    } else {
       rectList[Right_Area] = QRect(
           rect.right() - right_size.width(),
           tMargin - top_size.height() - verticalSpacing(), right_size.width(),
           rect.height() - top_size.height() - verticalSpacing());
+      if (d->m_widgets_map[Right_Area].size()) {
+        d->m_widgets_map[Right_Area].at(0)->widget()->setProperty(
+            "MousePosition", MousePosition::Left);
+        int top_bottom_min_widget =
+            top_min_size.width() < bottom_min_size.width()
+                ? bottom_min_size.width()
+                : top_min_size.width();
+        d->m_widgets_map[Right_Area].at(0)->widget()->setMaximumWidth(
+            left_min_size.width() + top_bottom_min_widget);
+      }
+    }
   } else {
     QRect initial_rect = QRect(
         rect.right() - right_size.width(),
@@ -367,11 +508,41 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea() {
           d->m_widgets_map[Top_Area].isEmpty()) {
         initial_rect.setTop(rect.top());
         initial_rect.setHeight(rect.height());
+        if (d->m_widgets_map[Right_Area].size()) {
+          d->m_widgets_map[Right_Area].at(0)->widget()->setProperty(
+              "MousePosition", MousePosition::Left);
+          int top_bottom_min_widget =
+              top_min_size.width() < bottom_min_size.width()
+                  ? bottom_min_size.width()
+                  : top_min_size.width();
+          d->m_widgets_map[Right_Area].at(0)->widget()->setMaximumWidth(
+              left_min_size.width() + top_bottom_min_widget);
+        }
       } else if (d->m_widgets_map[Bottom_Area].isEmpty()) {
         initial_rect.setHeight(rect.height() - bottom_size.height());
+        if (d->m_widgets_map[Right_Area].size()) {
+          d->m_widgets_map[Right_Area].at(0)->widget()->setProperty(
+              "MousePosition", MousePosition::Left);
+          int top_bottom_min_widget =
+              top_min_size.width() < bottom_min_size.width()
+                  ? bottom_min_size.width()
+                  : top_min_size.width();
+          d->m_widgets_map[Right_Area].at(0)->widget()->setMaximumWidth(
+              left_min_size.width() + top_bottom_min_widget);
+        }
       } else if (d->m_widgets_map[Top_Area].isEmpty()) {
         initial_rect.setTop(rect.top());
         initial_rect.setHeight(rect.height() - bottom_size.height());
+        if (d->m_widgets_map[Right_Area].size()) {
+          d->m_widgets_map[Right_Area].at(0)->widget()->setProperty(
+              "MousePosition", MousePosition::Left);
+          int top_bottom_min_widget =
+              top_min_size.width() < bottom_min_size.width()
+                  ? bottom_min_size.width()
+                  : top_min_size.width();
+          d->m_widgets_map[Right_Area].at(0)->widget()->setMaximumWidth(
+              left_min_size.width() + top_bottom_min_widget);
+        }
       }
     }
     rectList[Right_Area] = initial_rect;
@@ -381,24 +552,76 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea() {
       d->m_corner_belong[Right_Top_Corner] == Top_Area) {
     rectList[Top_Area] =
         QRect(lMargin, tMargin, rect.width(), top_size.height());
+    if (d->m_widgets_map[Top_Area].size()) {
+      d->m_widgets_map[Top_Area].at(0)->widget()->setProperty(
+          "MousePosition", MousePosition::Bottom);
+      int left_right_min_height =
+          left_min_size.height() < right_min_size.height()
+              ? right_min_size.height()
+              : left_min_size.height();
+      d->m_widgets_map[Top_Area].at(0)->widget()->setMaximumHeight(
+          bottom_min_size.height() + left_right_min_height);
+    }
   } else if (d->m_corner_belong[Left_Top_Corner] == Top_Area) {
-    if (auto_filled && d->m_widgets_map[Right_Area].isEmpty())
+    if (auto_filled && d->m_widgets_map[Right_Area].isEmpty()) {
       rectList[Top_Area] =
           QRect(lMargin, tMargin, rect.width(), top_size.height());
-    else
+      if (d->m_widgets_map[Top_Area].size()) {
+        d->m_widgets_map[Top_Area].at(0)->widget()->setProperty(
+            "MousePosition", MousePosition::Bottom);
+        int left_right_min_height =
+            left_min_size.height() < right_min_size.height()
+                ? right_min_size.height()
+                : left_min_size.height();
+        d->m_widgets_map[Top_Area].at(0)->widget()->setMaximumHeight(
+            bottom_min_size.height() + left_right_min_height);
+      }
+    } else {
       rectList[Top_Area] =
           QRect(lMargin, tMargin,
                 rect.width() - right_size.width() - horizontalSpacing(),
                 top_size.height());
+      if (d->m_widgets_map[Top_Area].size()) {
+        d->m_widgets_map[Top_Area].at(0)->widget()->setProperty(
+            "MousePosition", MousePosition::Bottom);
+        int left_right_min_height =
+            left_min_size.height() < right_min_size.height()
+                ? right_min_size.height()
+                : left_min_size.height();
+        d->m_widgets_map[Top_Area].at(0)->widget()->setMaximumHeight(
+            bottom_min_size.height() + left_right_min_height);
+      }
+    }
   } else if (d->m_corner_belong[Right_Top_Corner] == Top_Area) {
-    if (auto_filled && d->m_widgets_map[Left_Area].isEmpty())
+    if (auto_filled && d->m_widgets_map[Left_Area].isEmpty()) {
       rectList[Top_Area] =
           QRect(lMargin, tMargin, rect.width(), top_size.height());
-    else
+      if (d->m_widgets_map[Top_Area].size()) {
+        d->m_widgets_map[Top_Area].at(0)->widget()->setProperty(
+            "MousePosition", MousePosition::Bottom);
+        int left_right_min_height =
+            left_min_size.height() < right_min_size.height()
+                ? right_min_size.height()
+                : left_min_size.height();
+        d->m_widgets_map[Top_Area].at(0)->widget()->setMaximumHeight(
+            bottom_min_size.height() + left_right_min_height);
+      }
+    } else {
       rectList[Top_Area] =
           QRect(lMargin + left_size.width() + horizontalSpacing(), tMargin,
                 rect.width() - left_size.width() - horizontalSpacing(),
                 top_size.height());
+      if (d->m_widgets_map[Top_Area].size()) {
+        d->m_widgets_map[Top_Area].at(0)->widget()->setProperty(
+            "MousePosition", MousePosition::Bottom);
+        int left_right_min_height =
+            left_min_size.height() < right_min_size.height()
+                ? right_min_size.height()
+                : left_min_size.height();
+        d->m_widgets_map[Top_Area].at(0)->widget()->setMaximumHeight(
+            bottom_min_size.height() + left_right_min_height);
+      }
+    }
   } else {
     QRect initial_rect = QRect(lMargin + 200 + horizontalSpacing(), tMargin,
                                rect.width() - right_size.width() -
@@ -409,11 +632,41 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea() {
           d->m_widgets_map[Right_Area].isEmpty()) {
         initial_rect.setLeft(rect.left());
         initial_rect.setHeight(rect.width());
+        if (d->m_widgets_map[Top_Area].size()) {
+          d->m_widgets_map[Top_Area].at(0)->widget()->setProperty(
+              "MousePosition", MousePosition::Bottom);
+          int left_right_min_height =
+              left_min_size.height() < right_min_size.height()
+                  ? right_min_size.height()
+                  : left_min_size.height();
+          d->m_widgets_map[Top_Area].at(0)->widget()->setMaximumHeight(
+              bottom_min_size.height() + left_right_min_height);
+        }
       } else if (d->m_widgets_map[Right_Area].isEmpty()) {
         initial_rect.setWidth(rect.width() - left_size.width());
+        if (d->m_widgets_map[Top_Area].size()) {
+          d->m_widgets_map[Top_Area].at(0)->widget()->setProperty(
+              "MousePosition", MousePosition::Bottom);
+          int left_right_min_height =
+              left_min_size.height() < right_min_size.height()
+                  ? right_min_size.height()
+                  : left_min_size.height();
+          d->m_widgets_map[Top_Area].at(0)->widget()->setMaximumHeight(
+              bottom_min_size.height() + left_right_min_height);
+        }
       } else if (d->m_widgets_map[Left_Area].isEmpty()) {
         initial_rect.setLeft(rect.left());
         initial_rect.setWidth(rect.width() - right_size.height());
+        if (d->m_widgets_map[Top_Area].size()) {
+          d->m_widgets_map[Top_Area].at(0)->widget()->setProperty(
+              "MousePosition", MousePosition::Bottom);
+          int left_right_min_height =
+              left_min_size.height() < right_min_size.height()
+                  ? right_min_size.height()
+                  : left_min_size.height();
+          d->m_widgets_map[Top_Area].at(0)->widget()->setMaximumHeight(
+              bottom_min_size.height() + left_right_min_height);
+        }
       }
     }
     rectList[Top_Area] = initial_rect;
@@ -423,27 +676,79 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea() {
       d->m_corner_belong[Right_Bottom_Corner] == Bottom_Area) {
     rectList[Bottom_Area] = QRect(lMargin, rect.bottom() - bottom_size.height(),
                                   rect.width(), bottom_size.height());
+    if (d->m_widgets_map[Bottom_Area].size()) {
+      d->m_widgets_map[Bottom_Area].at(0)->widget()->setProperty(
+          "MousePosition", MousePosition::Top);
+      int left_right_min_height =
+          left_min_size.height() < right_min_size.height()
+              ? right_min_size.height()
+              : left_min_size.height();
+      d->m_widgets_map[Bottom_Area].at(0)->widget()->setMaximumHeight(
+          bottom_min_size.height() + left_right_min_height);
+    }
   } else if (d->m_corner_belong[Left_Bottom_Corner] == Bottom_Area) {
-    if (auto_filled && d->m_widgets_map[Right_Area].isEmpty())
+    if (auto_filled && d->m_widgets_map[Right_Area].isEmpty()) {
       rectList[Bottom_Area] =
           QRect(lMargin, rect.bottom() - bottom_size.height(), rect.width(),
                 bottom_size.height());
-    else
+      if (d->m_widgets_map[Bottom_Area].size()) {
+        d->m_widgets_map[Bottom_Area].at(0)->widget()->setProperty(
+            "MousePosition", MousePosition::Top);
+        int left_right_min_height =
+            left_min_size.height() < right_min_size.height()
+                ? right_min_size.height()
+                : left_min_size.height();
+        d->m_widgets_map[Bottom_Area].at(0)->widget()->setMaximumHeight(
+            bottom_min_size.height() + left_right_min_height);
+      }
+    } else {
       rectList[Bottom_Area] =
           QRect(lMargin, rect.bottom() - bottom_size.height(),
                 rect.width() - right_size.width() - horizontalSpacing(),
                 bottom_size.height());
+      if (d->m_widgets_map[Bottom_Area].size()) {
+        d->m_widgets_map[Bottom_Area].at(0)->widget()->setProperty(
+            "MousePosition", MousePosition::Top);
+        int left_right_min_height =
+            left_min_size.height() < right_min_size.height()
+                ? right_min_size.height()
+                : left_min_size.height();
+        d->m_widgets_map[Bottom_Area].at(0)->widget()->setMaximumHeight(
+            bottom_min_size.height() + left_right_min_height);
+      }
+    }
   } else if (d->m_corner_belong[Right_Bottom_Corner] == Bottom_Area) {
-    if (auto_filled && d->m_widgets_map[Left_Area].isEmpty())
+    if (auto_filled && d->m_widgets_map[Left_Area].isEmpty()) {
+      if (d->m_widgets_map[Bottom_Area].size()) {
+        d->m_widgets_map[Bottom_Area].at(0)->widget()->setProperty(
+            "MousePosition", MousePosition::Top);
+        int left_right_min_height =
+            left_min_size.height() < right_min_size.height()
+                ? right_min_size.height()
+                : left_min_size.height();
+        d->m_widgets_map[Top_Area].at(0)->widget()->setMaximumSize(
+            rect.width(), bottom_min_size.height() + left_right_min_height);
+      }
       rectList[Bottom_Area] =
           QRect(lMargin, rect.bottom() - bottom_size.height(), rect.width(),
                 bottom_size.height());
-    else
+    } else {
       rectList[Bottom_Area] =
           QRect(rect.left() + left_size.width() + horizontalSpacing(),
                 rect.bottom() - bottom_size.height(),
                 rect.width() - left_size.width() - horizontalSpacing(),
                 bottom_size.height());
+      if (d->m_widgets_map[Bottom_Area].size()) {
+        d->m_widgets_map[Bottom_Area].at(0)->widget()->setProperty(
+            "MousePosition", MousePosition::Top);
+        int left_right_min_height =
+            left_min_size.height() < right_min_size.height()
+                ? right_min_size.height()
+                : left_min_size.height();
+        d->m_widgets_map[Bottom_Area].at(0)->widget()->setMaximumHeight(
+            bottom_min_size.height() + left_right_min_height);
+      }
+    }
   } else {
     QRect initial_rect =
         QRect(lMargin + left_size.width() + horizontalSpacing(),
@@ -456,11 +761,41 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea() {
           d->m_widgets_map[Right_Area].isEmpty()) {
         initial_rect.setLeft(rect.left());
         initial_rect.setHeight(rect.width());
+        if (d->m_widgets_map[Bottom_Area].size()) {
+          d->m_widgets_map[Bottom_Area].at(0)->widget()->setProperty(
+              "MousePosition", MousePosition::Top);
+          int left_right_min_height =
+              left_min_size.height() < right_min_size.height()
+                  ? right_min_size.height()
+                  : left_min_size.height();
+          d->m_widgets_map[Bottom_Area].at(0)->widget()->setMaximumHeight(
+              bottom_min_size.height() + left_right_min_height);
+        }
       } else if (d->m_widgets_map[Right_Area].isEmpty()) {
         initial_rect.setWidth(rect.width() - left_size.width());
+        if (d->m_widgets_map[Bottom_Area].size()) {
+          d->m_widgets_map[Bottom_Area].at(0)->widget()->setProperty(
+              "MousePosition", MousePosition::Top);
+          int left_right_min_height =
+              left_min_size.height() < right_min_size.height()
+                  ? right_min_size.height()
+                  : left_min_size.height();
+          d->m_widgets_map[Bottom_Area].at(0)->widget()->setMaximumHeight(
+              bottom_min_size.height() + left_right_min_height);
+        }
       } else if (d->m_widgets_map[Left_Area].isEmpty()) {
         initial_rect.setLeft(rect.left());
         initial_rect.setWidth(rect.width() - right_size.height());
+        if (d->m_widgets_map[Bottom_Area].size()) {
+          d->m_widgets_map[Bottom_Area].at(0)->widget()->setProperty(
+              "MousePosition", MousePosition::Top);
+          int left_right_min_height =
+              left_min_size.height() < right_min_size.height()
+                  ? right_min_size.height()
+                  : left_min_size.height();
+          d->m_widgets_map[Bottom_Area].at(0)->widget()->setMaximumHeight(
+              bottom_min_size.height() + left_right_min_height);
+        }
       }
     }
     rectList[Bottom_Area] = initial_rect;

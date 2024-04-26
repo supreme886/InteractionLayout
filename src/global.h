@@ -15,16 +15,16 @@ enum DragState {
 };
 
 enum MousePosition {
-  Left = 0,
-  Right,
-  Top,
-  Bottom,
-  TopLeft,
-  BottomRight,
-  BottomLeft,
-  TopRight,
-  Center,
-  Nowhere
+  Left = 0x00000000,
+  Right = 0x00000001,
+  Top = 0x00000002,
+  Bottom = 0x00000004,
+  TopLeft = 0x00000008,
+  BottomRight = 0x00000010,
+  BottomLeft = 0x00000012,
+  TopRight = 0x00000020,
+  Center = 0x00000040,
+  Nowhere = 0x000000ff
 };
 
 enum Area { Left_Area = 0, Right_Area, Top_Area, Bottom_Area, UnDefine_Area };
