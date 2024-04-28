@@ -18,12 +18,12 @@
 
 struct FloatingWidgetContainerPrivate {
   FloatingWidgetContainerPrivate(FloatingWidgetContainer *p, QWidget *w)
-      : _this(p), m_widget(w) {}
+      : m_this(p), m_widget(w) {}
 
-  FloatingWidgetContainer *_this{nullptr};
+  FloatingWidgetContainer *m_this{nullptr};
   QWidget *m_widget{nullptr};
-  bool m_isPressed{0};
-  QPoint m_pressPoint;
+  bool m_pressed{0};
+  QPoint m_press_point;
 };
 
 FloatingWidgetContainer::FloatingWidgetContainer(QWidget *wg)
@@ -60,9 +60,8 @@ bool FloatingWidgetContainer::event(QEvent *event) {
 }
 
 #ifdef Q_OS_WIN
-bool FloatingWidgetContainer::nativeEvent(const QByteArray &eventType,
+bool FloatingWidgetContainer::nativeEvent(const QByteArray &event_type,
                                           void *message, long *result) {
-  QWidget::nativeEvent(eventType, message, result);
   MSG *msg = static_cast<MSG *>(message);
   switch (msg->message) {
     case WM_MOVING: {
@@ -84,7 +83,7 @@ bool FloatingWidgetContainer::nativeEvent(const QByteArray &eventType,
     default:
       break;
   }
-  return Supre::nativeEvent(eventType, message, result);
+  return Supre::nativeEvent(event_type, message, result);
 }
 #endif
 

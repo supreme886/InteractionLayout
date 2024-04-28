@@ -44,6 +44,7 @@ struct TabInfoStruct {
   QIcon m_Icon;
   QString m_titleName{"Null"};
   bool m_canSpliting{true};
+  bool m_canClosed{true};
 };
 
 #endif  // GLOBAL_H

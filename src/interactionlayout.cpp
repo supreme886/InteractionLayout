@@ -29,7 +29,7 @@ class InteractionLayoutPrivate {
   int m_vSpace{5};
   QRect m_rect;
   Area m_hover{UnDefine_Area};
-  QPointer<QRubberBand> gapIndicator;
+  QPointer<QRubberBand> m_gapIndicator;
   bool m_first_flag{true};
   bool m_auto_corner_fill{true};
 };
@@ -142,26 +142,26 @@ QLayoutItem *InteractionLayout::unplug(QWidget *widget) {
 bool InteractionLayout::plug(QWidget *widget, const QPoint &mousePos) {
   bool plug_success = false;
   QVarLengthArray<QRect, 4> rectList = getRectForArea();
-  int targetArea = -1;
+  int target_area = -1;
   for (int i = 0; i < 4; i++) {
     if (rectList.at(i).contains(parentWidget()->mapFromGlobal(mousePos))) {
-      targetArea = i;
+      target_area = i;
     }
   }
 
-  if (targetArea >= 0 && targetArea < 4) {
+  if (target_area >= 0 && target_area < 4) {
     widget->setParent(parentWidget());
     widget->show();
-    addWidgetByArea((Area)targetArea, widget);
+    addWidgetByArea((Area)target_area, widget);
     plug_success = true;
   } /*else {
-    if (d->gapIndicator) {
-      delete d->gapIndicator;
+    if (d->m_gapIndicator) {
+      delete d->m_gapIndicator;
     }
   }*/
 
-  if (d->gapIndicator) {
-    delete d->gapIndicator;
+  if (d->m_gapIndicator) {
+    delete d->m_gapIndicator;
   }
 
   update();
@@ -172,25 +172,26 @@ void InteractionLayout::hover(QWidget *widget, const QPoint &mousePos,
                               bool isMoving) {
   // QSize oldSize = widget->size();
   QVarLengthArray<QRect, 4> rectList = getRectForArea();
-  int targetArea = -1;
+  int target_area = -1;
   for (int i = 0; i < 4; i++) {
     if (rectList.at(i).contains(parentWidget()->mapFromGlobal(mousePos))) {
-      targetArea = i;
+      target_area = i;
       // widget->resize(rectList.at(i).size());
     }
   }
 
-  if (targetArea >= 0 && targetArea < 4) {
-    if (d->gapIndicator.isNull()) {
-      d->gapIndicator = new QRubberBand(QRubberBand::Rectangle, parentWidget());
+  if (target_area >= 0 && target_area < 4) {
+    if (d->m_gapIndicator.isNull()) {
+      d->m_gapIndicator =
+          new QRubberBand(QRubberBand::Rectangle, parentWidget());
     }
-    d->gapIndicator->setGeometry(rectList.at(targetArea));
-    d->gapIndicator->show();
-    d->gapIndicator->raise();
+    d->m_gapIndicator->setGeometry(rectList.at(target_area));
+    d->m_gapIndicator->show();
+    d->m_gapIndicator->raise();
   } else {
     // widget->resize(oldSize);
-    if (d->gapIndicator) {
-      delete d->gapIndicator;
+    if (d->m_gapIndicator) {
+      delete d->m_gapIndicator;
     }
   }
 }
@@ -234,7 +235,7 @@ bool InteractionLayout::setCornerBelongs(Corner corner, Area area) {
 }
 
 void InteractionLayout::setGapIndicatorHide() {
-  if (d->gapIndicator) delete d->gapIndicator;
+  if (d->m_gapIndicator) delete d->m_gapIndicator;
 }
 
 void InteractionLayout::setAutoCornerFill(bool filled) {}
