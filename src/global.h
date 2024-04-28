@@ -1,7 +1,7 @@
 ﻿#ifndef GLOBAL_H
 #define GLOBAL_H
 
-#include <QApplication>'
+#include <QApplication>
 #include <QPointer>
 #include <QStyle>
 

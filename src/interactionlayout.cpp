@@ -727,7 +727,7 @@ QVarLengthArray<QRect, 4> InteractionLayout::getRectForArea() {
             left_min_size.height() < right_min_size.height()
                 ? right_min_size.height()
                 : left_min_size.height();
-        d->m_widgets_map[Top_Area].at(0)->widget()->setMaximumSize(
+        d->m_widgets_map[Bottom_Area].at(0)->widget()->setMaximumSize(
             rect.width(), bottom_min_size.height() + left_right_min_height);
       }
       rectList[Bottom_Area] =

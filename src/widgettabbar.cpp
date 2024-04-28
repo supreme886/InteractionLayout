@@ -43,6 +43,7 @@ WidgetTabBar::WidgetTabBar(WidgetGroup *parent)
     : Super(parent), d(new WidgetTabBarPrivate(this, parent)) {
   setFixedHeight(30);
   setMouseTracking(true);
+  setAutoFillBackground(true);
 }
 
 bool WidgetTabBar::addWidgetTab(TabInfoStruct *tab) {
