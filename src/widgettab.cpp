@@ -72,7 +72,9 @@ void IWidgetTab::setCanspliting(bool canSpliting) {
   d->setCanSpliting(canSpliting);
 }
 
-bool IWidgetTab::isCanSpliting() { return d->isCanSpliting(); }
+bool IWidgetTab::isCanSpliting() {
+  return d->isCanSpliting() && cursor().shape() == Qt::ArrowCursor;
+}
 
 void IWidgetTab::mousePressEvent(QMouseEvent *e) {
   if (e->button() == Qt::LeftButton) {
@@ -80,6 +82,8 @@ void IWidgetTab::mousePressEvent(QMouseEvent *e) {
       e->accept();
       d->saveDragStartMousePosition(e->globalPos());
       d->m_DragState = DraggingMousePressed;
+    } else {
+      e->ignore();
     }
     setChecked(!isChecked());
     Q_EMIT clicked();

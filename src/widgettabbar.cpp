@@ -77,7 +77,8 @@ void WidgetTabBar::setCurrentWidget(QWidget *widget) {
 }
 
 void WidgetTabBar::mousePressEvent(QMouseEvent *event) {
-  if (Qt::LeftButton == event->button()) {
+  if (Qt::LeftButton == event->button() &&
+      cursor().shape() == Qt::ArrowCursor) {
     event->accept();
     d->m_startDragPonit = event->pos();
     d->m_dragState = DraggingMousePressed;
