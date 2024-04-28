@@ -38,7 +38,7 @@ class WidgetTabBar : public IWidgetTabBar {
   void onTabClosed();
   void onTabSplit();
   void onTabCloseOtherTabs();
-  void onTabMoved(const QPoint &GlobalPos);
+  void onTabMoved(const QPoint &global_pos);
 
  private:
   void splitWidgt();

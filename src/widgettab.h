@@ -7,7 +7,7 @@
 class WidgetTabPrivate;
 class IWidget;
 class TabInfoStruct;
-
+class QPushButton;
 class IWidgetTab : public QAbstractButton {
   Q_OBJECT
  private:
@@ -21,7 +21,7 @@ class IWidgetTab : public QAbstractButton {
   QIcon getIcon();
   QString titleName();
 
-  void setCanspliting(bool canSpliting);
+  void setCanspliting(bool can_spliting);
   bool isCanSpliting();
 
  protected:
@@ -33,11 +33,10 @@ class IWidgetTab : public QAbstractButton {
 
  Q_SIGNALS:
   void activeTabChanged();
-  void clicked();
   void closed();
   void tabsplit();
   void closeOtherTabs();
-  void moved(const QPoint& GlobalPos);
+  void moved(const QPoint& global_pos);
 };
 
 class WidgetTab : public IWidgetTab {
@@ -48,8 +47,14 @@ class WidgetTab : public IWidgetTab {
   WidgetTab(TabInfoStruct* tab, QWidget* parent = nullptr);
   ~WidgetTab();
 
+  void setCanClosed(bool can_closed);
+  bool isCanClosed();
+
  protected:
   virtual void paintEvent(QPaintEvent* e) override;
+
+ private:
+  QPushButton* m_close_btn{nullptr};
 };
 
 #endif  // WIDGETTAB_H

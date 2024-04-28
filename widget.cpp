@@ -10,7 +10,7 @@
 #include <QTabWidget>
 #include <QTextEdit>
 
-#include "src/basewidget.h"
+#include "src/basesubwidget.h"
 #include "src/dragmanager.h"
 #include "src/floatingwidgetcontainer.h"
 #include "src/interactionlayout.h"

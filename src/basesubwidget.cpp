@@ -1,4 +1,4 @@
-﻿#include "basewidget.h"
+﻿#include "basesubwidget.h"
 
 #include <QApplication>
 #include <QDebug>
@@ -15,18 +15,20 @@
 
 struct BaseWidgetPrivate {
   BaseWidgetPrivate(BaseSubWidget *pub)
-      : _this(pub), m_widgetTab(new TabInfoStruct(_this)) {}
+      : m_this(pub), m_widget_tab(new TabInfoStruct(m_this)) {}
 
-  void saveDragStartMousePosition(const QPoint &GlobalPos);
+  void saveDragStartMousePosition(const QPoint &global_pos);
 
   TabInfoStruct *getTabInfo();
 
-  void setResizeHandle(bool canResize);
-  void setCanResize(bool canResize);
+  void setResizeHandle(bool has_resizer);
+  void setCanResize(bool can_resize);
   bool isCanResize();
+  void setCanClosed(bool canClosed);
+  bool isCanClosed();
 
-  BaseSubWidget *_this{nullptr};
-  TabInfoStruct *m_widgetTab{nullptr};
+  BaseSubWidget *m_this{nullptr};
+  TabInfoStruct *m_widget_tab{nullptr};
   WidgetResizeHandler *m_reszie_handler{nullptr};
   QPoint m_press_point;
   QPoint m_press_global_point;
@@ -35,31 +37,37 @@ struct BaseWidgetPrivate {
   bool m_can_resize{true};
 };
 
-void BaseWidgetPrivate::saveDragStartMousePosition(const QPoint &GlobalPos) {
-  m_press_point = GlobalPos;
-  m_press_global_point = _this->mapFromGlobal(GlobalPos);
+void BaseWidgetPrivate::saveDragStartMousePosition(const QPoint &global_pos) {
+  m_press_point = global_pos;
+  m_press_global_point = m_this->mapFromGlobal(global_pos);
 }
 
-TabInfoStruct *BaseWidgetPrivate::getTabInfo() { return m_widgetTab; }
+TabInfoStruct *BaseWidgetPrivate::getTabInfo() { return m_widget_tab; }
 
-void BaseWidgetPrivate::setResizeHandle(bool canResize) {
+void BaseWidgetPrivate::setResizeHandle(bool has_resizer) {
   if (!m_reszie_handler) {
-    m_reszie_handler = new WidgetResizeHandler(_this);
+    m_reszie_handler = new WidgetResizeHandler(m_this);
     m_reszie_handler->setActive(WidgetResizeHandler::Move, false);
   }
   // d->m_reszie_handler->setMovingEnabled(canResize);
-  m_reszie_handler->setActive(WidgetResizeHandler::Resize, canResize);
+  m_reszie_handler->setActive(WidgetResizeHandler::Resize, has_resizer);
 }
 
-void BaseWidgetPrivate::setCanResize(bool canResize) {
-  m_can_resize = canResize;
+void BaseWidgetPrivate::setCanResize(bool can_resize) {
+  m_can_resize = can_resize;
 }
 
 bool BaseWidgetPrivate::isCanResize() { return m_can_resize; }
 
+void BaseWidgetPrivate::setCanClosed(bool can_closed) {
+  m_widget_tab->m_can_closed = can_closed;
+}
+
+bool BaseWidgetPrivate::isCanClosed() { return m_widget_tab->m_can_closed; }
+
 BaseSubWidget::BaseSubWidget(QWidget *parent)
     : Super(parent), d(new BaseWidgetPrivate(this)) {
-  d->m_widgetTab->m_titleName = "dadadasdddddddddddddd";
+  d->m_widget_tab->m_title_name = "dadadasdddddddddddddd";
   setMouseTracking(true);
   setMinimumSize(200, 200);
 }
@@ -77,42 +85,50 @@ FloatingWidgetContainer *BaseSubWidget::startSplits() {
 
   FloatingWidgetContainer *container = new FloatingWidgetContainer(this);
   container->setGeometry(r);
-  container->setWindowTitle(d->m_widgetTab->m_titleName);
+  container->setWindowTitle(d->m_widget_tab->m_title_name);
   container->show();
 
   DragManager::instance()->setDragEventFilter(container);
-  QMouseEvent *mouseEvent =
+  QMouseEvent *mouse_event =
       new QMouseEvent(QEvent::MouseButtonPress, QCursor::pos(), Qt::LeftButton,
                       Qt::LeftButton, Qt::NoModifier);
-  qApp->sendEvent(container, mouseEvent);
+  qApp->sendEvent(container, mouse_event);
 
   return container;
 }
 
 void BaseSubWidget::endSplits() {}
 
-void BaseSubWidget::setResizeHandle(bool canResize) {
-  d->setResizeHandle(canResize);
+void BaseSubWidget::setResizeHandle(bool can_resize) {
+  d->setResizeHandle(can_resize);
 }
 
-TabInfoStruct *BaseSubWidget::getTabInfoStruct() { return d->m_widgetTab; }
+TabInfoStruct *BaseSubWidget::getTabInfoStruct() { return d->m_widget_tab; }
 
-void BaseSubWidget::setCanspliting(bool canSpliting) {
-  getTabInfoStruct()->m_canSpliting = canSpliting;
+void BaseSubWidget::setCanspliting(bool can_spliting) {
+  getTabInfoStruct()->m_can_spliting = can_spliting;
 }
 
 bool BaseSubWidget::isCanSpliting() {
-  return getTabInfoStruct()->m_canSpliting;
+  return getTabInfoStruct()->m_can_spliting;
 }
 
-void BaseSubWidget::setCanResize(bool canResize) { d->setCanResize(canResize); }
+void BaseSubWidget::setCanResize(bool can_resize) {
+  d->setCanResize(can_resize);
+}
 
 bool BaseSubWidget::isCanResize() { return d->isCanResize(); }
+
+void BaseSubWidget::setCanClosed(bool can_closed) {
+  d->setCanClosed(can_closed);
+}
+
+bool BaseSubWidget::isCanClosed() { return d->isCanClosed(); }
 
 bool BaseSubWidget::event(QEvent *event) {
   switch (event->type()) {
     case QEvent::WindowTitleChange:
-      d->m_widgetTab->m_titleName = windowTitle();
+      d->m_widget_tab->m_title_name = windowTitle();
       break;
     default:
       break;

@@ -38,12 +38,13 @@ enum Corner {
 
 struct TabInfoStruct {
   TabInfoStruct(QPointer<BaseSubWidget> w)
-      : m_tagWidget(w),
+      : m_tag_widget(w),
         m_Icon(qApp->style()->standardIcon(QStyle::SP_TitleBarCloseButton)) {}
-  QPointer<BaseSubWidget> m_tagWidget;
+  QPointer<BaseSubWidget> m_tag_widget;
   QIcon m_Icon;
-  QString m_titleName{"Null"};
-  bool m_canSpliting{true};
+  QString m_title_name{"Null"};
+  bool m_can_spliting{true};
+  bool m_can_closed{true};
 };
 
 #endif  // GLOBAL_H

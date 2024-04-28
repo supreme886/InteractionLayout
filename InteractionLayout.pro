@@ -9,7 +9,7 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    src/basewidget.cpp \
+    src/basesubwidget.cpp \
     src/drageventfilter.cpp \
     src/dragmanager.cpp \
     src/floatingwidgetcontainer.cpp \
@@ -23,7 +23,7 @@ SOURCES += \
     src/widgetresizehandler.cpp
 
 HEADERS += \
-    src/basewidget.h \
+    src/basesubwidget.h \
     src/drageventfilter.h \
     src/dragmanager.h \
     src/floatingwidgetcontainer.h \

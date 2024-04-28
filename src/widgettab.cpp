@@ -9,14 +9,14 @@
 #include <QPainter>
 #include <QPushButton>
 
-#include "basewidget.h"
+#include "basesubwidget.h"
 #include "global.h"
 
 struct WidgetTabPrivate {
   WidgetTabPrivate(IWidgetTab *_pub, TabInfoStruct *info);
   ~WidgetTabPrivate() {}
 
-  void saveDragStartMousePosition(const QPoint &GlobalPos);
+  void savem_drag_start_mouse_position(const QPoint &global_pos);
 
   bool isDraggingState(DragState dragState);
 
@@ -24,28 +24,29 @@ struct WidgetTabPrivate {
 
   bool isCanSpliting();
 
-  IWidgetTab *_this{nullptr};
-  QPoint GlobalDragStartMousePosition;
-  QPoint DragStartMousePosition;
-  DragState m_DragState;
-  TabInfoStruct *m_tabInfo;
+  IWidgetTab *m_this{nullptr};
+  QPoint m_global_drag_start_mouse_position;
+  QPoint m_drag_start_mouse_position;
+  DragState m_drag_state;
+  TabInfoStruct *m_tab_info;
   bool m_can_spliting{true};
 };
 
 WidgetTabPrivate::WidgetTabPrivate(IWidgetTab *_pub, TabInfoStruct *info)
-    : _this(_pub), m_tabInfo(info) {}
+    : m_this(_pub), m_tab_info(info) {}
 
-void WidgetTabPrivate::saveDragStartMousePosition(const QPoint &GlobalPos) {
-  GlobalDragStartMousePosition = GlobalPos;
-  DragStartMousePosition = _this->mapFromGlobal(GlobalPos);
+void WidgetTabPrivate::savem_drag_start_mouse_position(
+    const QPoint &global_pos) {
+  m_global_drag_start_mouse_position = global_pos;
+  m_drag_start_mouse_position = m_this->mapFromGlobal(global_pos);
 }
 
-bool WidgetTabPrivate::isDraggingState(DragState dragState) {
-  return m_DragState == dragState;
+bool WidgetTabPrivate::isDraggingState(DragState drag_state) {
+  return m_drag_state == drag_state;
 }
 
-void WidgetTabPrivate::setCanSpliting(bool canSplitig) {
-  m_can_spliting = canSplitig;
+void WidgetTabPrivate::setCanSpliting(bool can_splitig) {
+  m_can_spliting = can_splitig;
 }
 
 bool WidgetTabPrivate::isCanSpliting() { return m_can_spliting; }
@@ -64,12 +65,12 @@ IWidgetTab::~IWidgetTab() {
   delete d;
 }
 
-QIcon IWidgetTab::getIcon() { return d->m_tabInfo->m_Icon; }
+QIcon IWidgetTab::getIcon() { return d->m_tab_info->m_Icon; }
 
-QString IWidgetTab::titleName() { return d->m_tabInfo->m_titleName; }
+QString IWidgetTab::titleName() { return d->m_tab_info->m_title_name; }
 
-void IWidgetTab::setCanspliting(bool canSpliting) {
-  d->setCanSpliting(canSpliting);
+void IWidgetTab::setCanspliting(bool can_spliting) {
+  d->setCanSpliting(can_spliting);
 }
 
 bool IWidgetTab::isCanSpliting() {
@@ -80,8 +81,8 @@ void IWidgetTab::mousePressEvent(QMouseEvent *e) {
   if (e->button() == Qt::LeftButton) {
     if (isCanSpliting()) {
       e->accept();
-      d->saveDragStartMousePosition(e->globalPos());
-      d->m_DragState = DraggingMousePressed;
+      d->savem_drag_start_mouse_position(e->globalPos());
+      d->m_drag_state = DraggingMousePressed;
     } else {
       e->ignore();
     }
@@ -94,10 +95,10 @@ void IWidgetTab::mousePressEvent(QMouseEvent *e) {
 
 void IWidgetTab::mouseReleaseEvent(QMouseEvent *e) {
   if (isCanSpliting() && e->button() == Qt::LeftButton) {
-    auto CurrentDragState = d->m_DragState;
-    d->GlobalDragStartMousePosition = QPoint();
-    d->DragStartMousePosition = QPoint();
-    d->m_DragState = DraggingInactive;
+    auto CurrentDragState = d->m_drag_state;
+    d->m_global_drag_start_mouse_position = QPoint();
+    d->m_drag_start_mouse_position = QPoint();
+    d->m_drag_state = DraggingInactive;
 
     switch (CurrentDragState) {
       case DraggingTab:
@@ -119,17 +120,17 @@ void IWidgetTab::mouseMoveEvent(QMouseEvent *e) {
   if (isCanSpliting()) {
     if (!(e->buttons() & Qt::LeftButton) ||
         d->isDraggingState(DraggingInactive)) {
-      d->m_DragState = DraggingInactive;
+      d->m_drag_state = DraggingInactive;
       Super::mouseMoveEvent(e);
       return;
     }
 
-    QPoint point = e->pos() - d->DragStartMousePosition;
+    QPoint point = e->pos() - d->m_drag_start_mouse_position;
     if (d->isDraggingState(DraggingMousePressed) &&
         point.manhattanLength() > 10) {
-      if (d->m_tabInfo->m_tagWidget) {
-        d->m_tabInfo->m_tagWidget->startSplits();
-        d->m_DragState = DraggingTab;
+      if (d->m_tab_info->m_tag_widget) {
+        d->m_tab_info->m_tag_widget->startSplits();
+        d->m_drag_state = DraggingTab;
         Q_EMIT tabsplit();
       }
     }
@@ -149,20 +150,27 @@ WidgetTab::WidgetTab(TabInfoStruct *tab, QWidget *parent) : Super(tab, parent) {
   title->setMouseTracking(true);
   layout->addWidget(title);
 
-  QPushButton *close_btn = new QPushButton;
-  close_btn->setFixedSize(20, 20);
-  close_btn->setIcon(getIcon());
+  m_close_btn = new QPushButton;
+  m_close_btn->setFixedSize(20, 20);
+  m_close_btn->setIcon(getIcon());
   // close_btn->setIconSize(QSize(8, 8));
-  connect(close_btn, &QPushButton::clicked, this, &WidgetTab::closed);
-  layout->addWidget(close_btn);
+  connect(m_close_btn, &QPushButton::clicked, this, &WidgetTab::closed);
+  layout->addWidget(m_close_btn);
   setChecked(true);
 }
 
 WidgetTab::~WidgetTab() {}
 
+void WidgetTab::setCanClosed(bool canClosed) {
+  m_close_btn->setVisible(canClosed);
+}
+
+bool WidgetTab::isCanClosed() { return m_close_btn->isVisible(); }
+
 void WidgetTab::paintEvent(QPaintEvent *e) {
   Q_UNUSED(e);
   QPainter painter(this);
+  painter.setFont(font());
   painter.setPen(Qt::NoPen);
   painter.fillRect(rect(),
                    QBrush(isChecked() ? QColor("#FFFFFF") : QColor("#E0E5ED")));

@@ -10,19 +10,19 @@
 #include "dragmanager.h"
 
 struct DragEventFilterPrivate {
-  DragEventFilterPrivate(DragEventFilter *pub) : _this(pub) {}
+  DragEventFilterPrivate(DragEventFilter *pub) : m_this(pub) {}
 
   void setDragWidget(QWidget *w);
 
-  DragEventFilter *_this;
-  QWidget *m_targetWidget{nullptr};
-  bool m_hasPressed{0};
-  QPoint m_pressPoint;
+  DragEventFilter *m_this;
+  QWidget *m_target_widget{nullptr};
+  bool m_has_pressed{0};
+  QPoint m_press_point;
 };
 
 void DragEventFilterPrivate::setDragWidget(QWidget *w) {
-  m_targetWidget = w;
-  m_targetWidget->installEventFilter(_this);
+  m_target_widget = w;
+  m_target_widget->installEventFilter(m_this);
 }
 
 DragEventFilter::DragEventFilter(QObject *parent)
@@ -30,12 +30,14 @@ DragEventFilter::DragEventFilter(QObject *parent)
 
 void DragEventFilter::setDragWidget(QWidget *w) { d->setDragWidget(w); }
 
-bool DragEventFilter::dragWidgetEmpty() { return d->m_targetWidget == nullptr; }
+bool DragEventFilter::dragWidgetEmpty() {
+  return d->m_target_widget == nullptr;
+}
 
 void DragEventFilter::beginDrag(const QPoint &point) {}
 
 bool DragEventFilter::eventFilter(QObject *watched, QEvent *event) {
-  if (d->m_targetWidget && d->m_targetWidget == watched) {
+  if (d->m_target_widget && d->m_target_widget == watched) {
     switch (event->type()) {
       case QEvent::MouseButtonPress: {
         startDrag(event);
@@ -61,36 +63,37 @@ bool DragEventFilter::eventFilter(QObject *watched, QEvent *event) {
 void DragEventFilter::startDrag(QEvent *event) {
   auto *e = dynamic_cast<QMouseEvent *>(event);
   if (e && e->button() == Qt::LeftButton) {
-    d->m_hasPressed = true;
-    d->m_pressPoint = d->m_targetWidget->mapFromGlobal(e->globalPos());
-    d->m_targetWidget->grabMouse();
+    d->m_has_pressed = true;
+    d->m_press_point = d->m_target_widget->mapFromGlobal(e->globalPos());
+    d->m_target_widget->grabMouse();
   }
 }
 
 void DragEventFilter::DragMoving(QEvent *event) {
-  if (d->m_hasPressed) {
+  if (d->m_has_pressed) {
     QMouseEvent *e = dynamic_cast<QMouseEvent *>(event);
-    QMargins windowMargins =
-        d->m_targetWidget->window()->windowHandle()->frameMargins();
-    QPoint windowMarginOffset =
-        QPoint(windowMargins.left(), windowMargins.top());
-    QPoint pos = e->globalPos() - d->m_pressPoint - windowMarginOffset;
-    d->m_targetWidget->move(pos);
-    DragManager::instance()->moveAndHover(d->m_targetWidget, QCursor::pos());
+    QMargins window_margins =
+        d->m_target_widget->window()->windowHandle()->frameMargins();
+    QPoint window_margin_offset =
+        QPoint(window_margins.left(), window_margins.top());
+    QPoint pos = e->globalPos() - d->m_press_point - window_margin_offset;
+    d->m_target_widget->move(pos);
+    DragManager::instance()->moveAndHover(d->m_target_widget, QCursor::pos());
   }
 }
 
 void DragEventFilter::endDrag(QEvent *event) {
   auto *e = dynamic_cast<QMouseEvent *>(event);
   if (e && e->button() == Qt::LeftButton) {
-    d->m_hasPressed = false;
-    d->m_pressPoint = QPoint();
-    d->m_targetWidget->releaseMouse();
-    d->m_targetWidget->removeEventFilter(this);
+    d->m_has_pressed = false;
+    d->m_press_point = QPoint();
+    d->m_target_widget->releaseMouse();
+    d->m_target_widget->removeEventFilter(this);
     if (DragManager::instance()->widgetPlug(
-            d->m_targetWidget->layout()->itemAt(0)->widget(), QCursor::pos())) {
-      d->m_targetWidget->deleteLater();
-      d->m_targetWidget = nullptr;
+            d->m_target_widget->layout()->itemAt(0)->widget(),
+            QCursor::pos())) {
+      d->m_target_widget->deleteLater();
+      d->m_target_widget = nullptr;
     }
   }
 }

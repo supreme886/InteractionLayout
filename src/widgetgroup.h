@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QWidget>
 
-#include "basewidget.h"
+#include "basesubwidget.h"
 
 class WidgetGroupPrivate;
 

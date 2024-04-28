@@ -10,15 +10,15 @@
 #include "interactionlayout.h"
 
 struct DragManagerPrivate {
-  DragManagerPrivate(DragManager *t) : _this(t) {
-    m_dragfilter = QSharedPointer<DragEventFilter>(new DragEventFilter);
+  DragManagerPrivate(DragManager *t) : m_this(t) {
+    m_drag_filter = QSharedPointer<DragEventFilter>(new DragEventFilter);
   }
 
-  DragManager *_this{nullptr};
-  QList<QWidget *> hasDragFeatureWidgets;
-  QList<FloatingWidgetContainer *> floatingwidgets;
-  int m_DragDistance{6};
-  QSharedPointer<DragEventFilter> m_dragfilter;
+  DragManager *m_this{nullptr};
+  QList<QWidget *> m_has_drag_feature_widgets;
+  QList<FloatingWidgetContainer *> m_floating_widgets;
+  int m_drag_distance{6};
+  QSharedPointer<DragEventFilter> m_drag_filter;
   bool m_can_popUp{true};
 };
 
@@ -26,15 +26,15 @@ DragManager::DragManager(Supre *parent)
     : Supre{parent}, d(new DragManagerPrivate(this)) {}
 
 void DragManager::addDragFeaturesWidget(QWidget *w) {
-  if (w) d->hasDragFeatureWidgets.append(w);
+  if (w) d->m_has_drag_feature_widgets.append(w);
 }
 
 void DragManager::addFloatingWidgetContainerWidget(FloatingWidgetContainer *w) {
-  if (w) d->floatingwidgets.append(w);
+  if (w) d->m_floating_widgets.append(w);
 }
 
 void DragManager::moveAndHover(QWidget *w, const QPoint &pos) {
-  foreach (QWidget *item, d->hasDragFeatureWidgets) {
+  foreach (QWidget *item, d->m_has_drag_feature_widgets) {
     if (!item->isVisible()) continue;
     InteractionLayout *layout =
         qobject_cast<InteractionLayout *>(item->layout());
@@ -50,7 +50,7 @@ void DragManager::moveAndHover(QWidget *w, const QPoint &pos) {
 }
 
 bool DragManager::widgetPlug(QWidget *w, const QPoint &pos) {
-  foreach (QWidget *item, d->hasDragFeatureWidgets) {
+  foreach (QWidget *item, d->m_has_drag_feature_widgets) {
     QRect geom(item->mapToGlobal(QPoint(0, 0)), item->size());
     if (item->isVisible() && geom.contains(pos)) {
       InteractionLayout *layout =
@@ -64,7 +64,7 @@ bool DragManager::widgetPlug(QWidget *w, const QPoint &pos) {
 }
 
 void DragManager::setDragEventFilter(QWidget *w) {
-  d->m_dragfilter->setDragWidget(w);
+  d->m_drag_filter->setDragWidget(w);
 }
 
 void DragManager::updateDragFeaturesWidgetList() {}

@@ -18,7 +18,7 @@ class FloatingWidgetContainer : public QWidget {
  protected:
   bool event(QEvent *event) override;
 #ifdef Q_OS_WIN
-  bool nativeEvent(const QByteArray &eventType, void *message,
+  bool nativeEvent(const QByteArray &event_type, void *message,
                    long *result) override;
 #endif
 

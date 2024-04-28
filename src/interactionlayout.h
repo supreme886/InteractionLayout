@@ -71,9 +71,9 @@ class InteractionLayout : public QLayout, public LayoutInterface {
 
   QLayoutItem *unplug(QWidget *widget);
 
-  bool plug(QWidget *widget, const QPoint &mousePos);
+  bool plug(QWidget *widget, const QPoint &mouse_pos);
 
-  void hover(QWidget *widget, const QPoint &mousePos, bool isMoving = true);
+  void hover(QWidget *widget, const QPoint &mouse_pos, bool is_moving = true);
 
   bool addWidgetByArea(Area area, QWidget *w);
 
@@ -86,7 +86,7 @@ class InteractionLayout : public QLayout, public LayoutInterface {
  private:
   int smartSpacing(QStyle::PixelMetric pm) const;
 
-  void setWidgetIntoArea(QWidget *widget, const QPoint &mousePos);
+  void setWidgetIntoArea(QWidget *widget, const QPoint &mouse_pos);
 
   /**
    *    计算每个吸附区域的Rect
